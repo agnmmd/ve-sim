@@ -64,19 +64,21 @@ class Scheduler:
     def get_idle_cars(self):
         return [car for car in self.cars if car.idle]
 
+    def get_queued_tasks(self):
+        return [task for car in self.cars for task in car.pending_tasks]
+
     def schedule_tasks(self, policy):
         while True:
             print("time:",env.now)
             if self.queued_tasks_exist() and self.idle_cars_exist():
                 for idle_car in self.get_idle_cars():
                     selected_task = policy(self.get_queued_tasks())
-                    random_car = random.choice(self.cars)
-                    random_task = random.choice(random_car.pending_tasks)
-                    print(f"Task {random_task.id} --> Car {idle_car.id}")
+                    print(f"Task {selected_task.id} --> Car {idle_car.id}")
 
                     # Housekeeping
                     idle_car.idle = False
-                    random_car.pending_tasks.remove(random_task)
+                    selected_task.source_car.pending_tasks.remove(selected_task)
+
                     # Processing the task
                     env.process(idle_car.process_task(selected_task))
             yield env.timeout(1)  # Check for tasks every unit of time
