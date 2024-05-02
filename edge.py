@@ -22,7 +22,7 @@ class Task:
     def __init__(self, source_car):
         self.id = Sim.set_task_id()
         self.source_car = source_car
-        self.duration = random.randint(1, 10)
+        self.deadline = random.randint(1, 10)
         self.priority = random.randint(0, 3)
         self.time_of_arrival = env.now
 
@@ -49,7 +49,7 @@ class Car:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
 
     def process_task(self, assigned_task):
-        yield env.timeout(assigned_task.duration)
+        yield env.timeout(assigned_task.deadline)
         print(f"At: t={env.now}, Car {self.id} computed task: {assigned_task.__dict__}")
         self.idle = True
 
@@ -93,10 +93,10 @@ def random_policy(tasks):
     else:
         return None
 
-def shortest_duration(tasks):
+def earliest_deadline(tasks):
     if tasks:
-        # Select the task with the shortest duration
-        return min(tasks, key=lambda task: task.duration)
+        # Select the task with the earliest deadline
+        return min(tasks, key=lambda task: task.deadline)
     else:
         return None
 
@@ -119,7 +119,7 @@ def main():
     # env.process(car2.generate_task())
     car1.generate_tasks_static()
     car2.generate_tasks_static()
-    env.process(scheduler.schedule_tasks(shortest_duration))
+    env.process(scheduler.schedule_tasks(earliest_deadline))
     
     env.run(until=20)  # Run the simulation for 20 time units
 
