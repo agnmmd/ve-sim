@@ -23,6 +23,8 @@ class Task:
         self.id = Sim.set_task_id()
         self.source_car = source_car
         self.duration = random.randint(1, 10)
+        self.priority = random.randint(0, 3)
+        self.time_of_arrival = env.now
 
 class Car:
     def __init__(self):
