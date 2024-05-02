@@ -39,7 +39,6 @@ class Car:
             task = Task(self)
             self.pending_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
-            # Rescheduling logic, if any, can be implemented outside of this method
 
     def generate_tasks_static(self):
         num_tasks = 2  # Number of tasks is limited to two
@@ -87,7 +86,6 @@ class Scheduler:
 
 
 def random_policy(tasks):
-    # Custom logic to select a task
     if tasks:
         return random.choice(tasks)
     else:
