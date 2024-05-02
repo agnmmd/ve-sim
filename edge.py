@@ -21,7 +21,7 @@ class Sim:
 class Task:
     def __init__(self, source_car):
         self.id = Sim.set_task_id()
-        self.source_id = source_id
+        self.source_car = source_car
         self.duration = duration
 
 class Car:
@@ -35,7 +35,7 @@ class Car:
         while True:
             yield env.timeout(random.expovariate(1.0/5))
             duration = random.uniform(1, 3)
-            task = Task(self.id, duration)
+            task = Task(self)
             self.pending_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
             # Rescheduling logic, if any, can be implemented outside of this method
@@ -44,13 +44,13 @@ class Car:
         num_tasks = 2  # Number of tasks is limited to two
         duration = 10  # Using fixed duration tasks
         
-        self.pending_tasks = [Task(self.id, duration) for _ in range(num_tasks)]
+        self.pending_tasks = [Task(self) for _ in range(num_tasks)]
         for task in self.pending_tasks:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
 
-    def compute_task(self, assigned_task):
-        print(f"Car {self.id} computed task: {assigned_task.__dict__}")
+    def process_task(self, assigned_task):
         yield env.timeout(assigned_task.duration)
+        print(f"At: t={env.now}, Car {self.id} computed task: {assigned_task.__dict__}")
 
 class Scheduler:
     def __init__(self, cars):
