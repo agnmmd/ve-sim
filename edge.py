@@ -49,6 +49,7 @@ class Car:
     def process_task(self, assigned_task):
         yield env.timeout(assigned_task.duration)
         print(f"At: t={env.now}, Car {self.id} computed task: {assigned_task.__dict__}")
+        self.idle = True
 
 class Scheduler:
     def __init__(self, cars):
