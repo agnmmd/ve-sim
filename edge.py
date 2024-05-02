@@ -22,7 +22,7 @@ class Task:
     def __init__(self, source_car):
         self.id = Sim.set_task_id()
         self.source_car = source_car
-        self.duration = duration
+        self.duration = random.randint(1, 10)
 
 class Car:
     def __init__(self):
@@ -34,7 +34,6 @@ class Car:
     def generate_task(self):
         while True:
             yield env.timeout(random.expovariate(1.0/5))
-            duration = random.uniform(1, 3)
             task = Task(self)
             self.pending_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
@@ -42,7 +41,6 @@ class Car:
 
     def generate_tasks_static(self):
         num_tasks = 2  # Number of tasks is limited to two
-        duration = 10  # Using fixed duration tasks
         
         self.pending_tasks = [Task(self) for _ in range(num_tasks)]
         for task in self.pending_tasks:
