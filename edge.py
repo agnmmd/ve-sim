@@ -5,6 +5,9 @@ class Sim:
     global env
     env = simpy.Environment()
 
+    _random_seed_value = 42
+    random.seed(_random_seed_value)
+
     _task_id_counter = 0
     _car_id_counter = 0
 
