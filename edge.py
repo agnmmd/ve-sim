@@ -2,6 +2,9 @@ import simpy
 import random
 
 class Sim:
+    global env
+    env = simpy.Environment()
+
     _task_id_counter = 0
     _car_id_counter = 0
 
@@ -16,14 +19,13 @@ class Sim:
         return cls._car_id_counter
 
 class Task:
-    def __init__(self, source_id, duration):
+    def __init__(self, source_car):
         self.id = Sim.set_task_id()
         self.source_id = source_id
         self.duration = duration
 
 class Car:
-    def __init__(self, env):
-        self.env = env
+    def __init__(self):
         self.id = Sim.set_car_id()
         self.pending_tasks = []
         self.computing_power = 2
@@ -31,7 +33,7 @@ class Car:
 
     def generate_task(self):
         while True:
-            yield self.env.timeout(random.expovariate(1.0/5))
+            yield env.timeout(random.expovariate(1.0/5))
             duration = random.uniform(1, 3)
             task = Task(self.id, duration)
             self.pending_tasks.append(task)
@@ -47,12 +49,11 @@ class Car:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
 
     def compute_task(self, assigned_task):
-        yield self.env.timeout(assigned_task.duration)
         print(f"Car {self.id} computed task: {assigned_task.__dict__}")
+        yield env.timeout(assigned_task.duration)
 
 class Scheduler:
-    def __init__(self, env, cars):
-        self.env = env
+    def __init__(self, cars):
         self.cars = cars
 
     def queued_tasks_exist(self):
@@ -66,7 +67,7 @@ class Scheduler:
 
     def schedule_tasks(self):
         while True:
-            print("time:",self.env.now)
+            print("time:",env.now)
             if self.queued_tasks_exist() and self.idle_cars_exist():
                 for idle_car in self.get_idle_cars():
                     random_car = random.choice(self.cars)
@@ -77,16 +78,16 @@ class Scheduler:
                     idle_car.idle = False
                     random_car.pending_tasks.remove(random_task)
                     # Processing the task
-                    self.env.process(idle_car.compute_task(random_task))
-            yield self.env.timeout(1)  # Check for tasks every unit of time
+                    env.process(idle_car.process_task(selected_task))
+            yield env.timeout(1)  # Check for tasks every unit of time
 
 def main():
-    env = simpy.Environment()
+    # env = simpy.Environment()
 
-    car1 = Car(env)
-    car2 = Car(env)
+    car1 = Car()
+    car2 = Car()
     cars = [car1, car2]
-    scheduler = Scheduler(env, cars)
+    scheduler = Scheduler(cars)
 
     # env.process(car1.generate_task())
     # env.process(car2.generate_task())
