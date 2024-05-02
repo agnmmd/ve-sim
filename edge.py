@@ -64,11 +64,12 @@ class Scheduler:
     def get_idle_cars(self):
         return [car for car in self.cars if car.idle]
 
-    def schedule_tasks(self):
+    def schedule_tasks(self, policy):
         while True:
             print("time:",env.now)
             if self.queued_tasks_exist() and self.idle_cars_exist():
                 for idle_car in self.get_idle_cars():
+                    selected_task = policy(self.get_queued_tasks())
                     random_car = random.choice(self.cars)
                     random_task = random.choice(random_car.pending_tasks)
                     print(f"Task {random_task.id} --> Car {idle_car.id}")
@@ -79,6 +80,28 @@ class Scheduler:
                     # Processing the task
                     env.process(idle_car.process_task(selected_task))
             yield env.timeout(1)  # Check for tasks every unit of time
+
+
+def random_policy(tasks):
+    # Custom logic to select a task
+    if tasks:
+        return random.choice(tasks)
+    else:
+        return None
+
+def shortest_duration(tasks):
+    if tasks:
+        # Select the task with the shortest duration
+        return min(tasks, key=lambda task: task.duration)
+    else:
+        return None
+
+def highest_priority(tasks):
+    if tasks:
+        # Select the task with the highest priority
+        return min(tasks, key=lambda task: task.priority)
+    else:
+        return None
 
 def main():
     # env = simpy.Environment()
@@ -92,7 +115,7 @@ def main():
     # env.process(car2.generate_task())
     car1.generate_tasks_static()
     car2.generate_tasks_static()
-    env.process(scheduler.schedule_tasks())
+    env.process(scheduler.schedule_tasks(shortest_duration))
     
     env.run(until=20)  # Run the simulation for 20 time units
 
