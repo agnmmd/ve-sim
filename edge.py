@@ -144,7 +144,8 @@ class Scheduler:
             print_color("----------------------------------------------------","95")
             self.print_schedule("After Scheduling")
             # print_color(f"\n================== [End] time: {Sim.env.now} ==================","93")
-            yield Sim.env.timeout(1)  # Check for tasks every unit of time
+            offset = 0.0001 * random.random()
+            yield Sim.env.timeout(1 + offset)  # Check for tasks every unit of time
 
     def print_schedule(self, string):
         idle_cars_ids = [car.id for car in self.get_idle_cars()]
