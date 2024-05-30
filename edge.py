@@ -80,7 +80,7 @@ class Car:
         if Sim.env.now - assigned_task.time_of_arrival <= assigned_task.deadline:
             self.successful_tasks += 1
 
-        print(f"At: t={Sim.env.now}, Car {self.id} computed task: {assigned_task.id}!")
+        print(f"@t={Sim.env.now}, Car {self.id} finished computing Task: {assigned_task.id}!")
         self.idle = True
         Scheduler.remove_from_schedule(self.id)
 
@@ -141,9 +141,9 @@ class Scheduler:
                     Sim.env.process(idle_car.process_task(selected_task))
 
             # Print state after assignments are finished
-            print("----------------------------------------------------")
+            print_color("----------------------------------------------------","95")
             self.print_schedule("After Scheduling")
-            print_color("====================================================", "93")
+            # print_color(f"\n================== [End] time: {Sim.env.now} ==================","93")
             yield Sim.env.timeout(1)  # Check for tasks every unit of time
 
     def print_schedule(self, string):
@@ -162,10 +162,10 @@ class Scheduler:
             print("---------------------------")
             for car_id, task in self.__class__.schedule.items():
                 if task:
-                    print(f"{car_id:6} | {task.id:7} | {'X' * task.deadline}")
+                    print(f"{car_id:6} | {task.id:7} | {'X' * int(task.deadline)}")
                 else:
                     print(f"{car_id:6} | {task.id:7} | Task Not Found")
-            print("---------------------------")
+            print("---------------------------\n")
 
 class Policy:
     @staticmethod
