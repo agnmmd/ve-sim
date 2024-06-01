@@ -1,5 +1,6 @@
 import simpy
 import random
+import traci
 
 def print_color(string, color_code, argument=""):
         # Black (Gray): 90m
@@ -200,21 +201,72 @@ def generate_cars(lambda_rate):
         print(f"New Car {new_car.id} added at time {Sim.env.now}")
         new_car.generate_tasks_static(2)
 
+def generate_cars_by_traces(traces, scheduler, region_of_interest):
+    xmin, ymin, xmax, ymax = region_of_interest
+    for car_id in traces[Sim.env.now].items():
+        if car_id not in [car.id for car in scheduler.cars]:
+            new_car = Car()
+            print(f"New Car {new_car.id} added at time {Sim.env.now}")
+            new_car.generate_tasks_static(2)
+
+    yield Sim.env.timeout(1)
+    # TODO: only register car in scheduler, if is ROI and unregister if not in ROI
+
+class SumoManager:
+    sumoBinary = ""
+    sumo_cfg = ""
+    traces = {}
+
+    def set_sumo_binary(cls, path):
+        cls.sumoBinary = path
+    
+    def set_sumo_config_path(cls, path):
+        cls.sumo_cfg = path
+
+    def run_sumo_simulation(cls, until):
+
+        sumoCmd = [cls.sumoBinary, "-c", cls.sumo_cfg]
+        traci.start(sumoCmd)
+        for step in range(until):
+            traci.simulationStep()
+            
+            for v_id in traci.vehicle.getIDList():
+                v_pos = traci.vehicle.getPosition(v_id)
+                if step not in cls.traces:
+                    cls.traces[step] = {}
+                cls.traces[step][v_id] = v_pos
+
+        traci.close()
+    
+    def print_traces(cls):
+        for step in cls.traces:
+            print_color(f"\n============ Step {step} ============","93")
+            for v_id, pos in cls.traces[step].items():
+                print(f"  Vehicle {v_id}: x: {pos[0]}, y: {pos[1]}")
+
 def main():
+    sumo = SumoManager()
+    sumo.set_sumo_binary("/usr/local/bin/sumo-gui") # $ which sumo-gui
+    sumo.set_sumo_config_path("/Users/Ankai/Desktop/virtual_edge/code/SUMO/street.sumocfg") #change path
+    sumo.run_sumo_simulation(until= 30)
+    sumo.print_traces()
+
     # env = simpy.Environment()
     scheduler = Scheduler()
 
     # NOTE: Static car insertion
-    car1 = Car()
-    car2 = Car()
-    car3 = Car()
+    #car1 = Car()
+    #car2 = Car()
+    #car3 = Car()
     # env.process(car1.generate_task())
     # env.process(car2.generate_task())
-    car1.generate_tasks_static(1)
-    car2.generate_tasks_static(1)
+    #car1.generate_tasks_static(1)
+    #car2.generate_tasks_static(1)
 
     # NOTE: Dynamic car insertion
     # Sim.env.process(generate_cars(lambda_rate=0.5))
+
+    Sim.env.process(generate_cars_by_traces(sumo.traces, scheduler, (0,0,0,0)))
 
     Sim.env.process(scheduler.schedule_tasks(Policy.earliest_deadline))
     
