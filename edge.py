@@ -1,10 +1,11 @@
-import os
+from policy import Policy
+from statistics import Statistics
 import random
-
 import simpy
 import simpy.util
 import traci
 import traci.constants as tc
+import os
 
 def print_color(string, color_code, argument=""):
         # Black (Gray): 90m
@@ -41,17 +42,22 @@ class Task:
         self.id = "t" + str(Sim.set_task_id())
         self.source_car = source_car
         self.time_of_arrival = Sim.env.now
-        self.deadline = random.randint(1, 10)
+        self.deadline = 2 #random.randint(1, 10)
         self.priority = random.randint(0, 3)
-        self.complexity = random.randint(1,6)
+        self.complexity = 2 #random.randint(1,6)
+        self.processing_start = None
+        self.processing_end = None
 
 class Car:
     def __init__(self):
         self.id = "c" + str(Sim.set_car_id())
-        self.pending_tasks = []
-        self.computing_power = 2
+        self.generated_tasks = []
+        self.processing_power = 2
         self.idle = True
         self.dwell_time = 10
+        self.assigned_tasks = []
+        self.processor = simpy.Resource(Sim.env, capacity=1)
+        self.current_task = None
 
         # Statistics
         self.successful_tasks = 0
@@ -67,31 +73,56 @@ class Car:
         while True:
             yield Sim.env.timeout(random.expovariate(1.0/5))
             task = Task(self)
-            self.pending_tasks.append(task)
+            self.generated_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
 
     def generate_tasks_static(self, num_tasks):
-        self.pending_tasks = [Task(self) for _ in range(num_tasks)]
-        for task in self.pending_tasks:
+        self.generated_tasks = [Task(self) for _ in range(num_tasks)]
+        for task in self.generated_tasks:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
 
-    def process_task(self, assigned_task):
-        processing_time = assigned_task.deadline  # Ensure tasks finish before the deadline
-        yield Sim.env.timeout(processing_time)
+    def process_task(self, selected_task):
+        with self.processor.request() as req:
+            yield req
 
-        # Update metrics
-        self.total_processing_time += processing_time
-        self.processed_tasks_count += 1
-        if Sim.env.now - assigned_task.time_of_arrival <= assigned_task.deadline:
-            self.successful_tasks += 1
+            # Housekeeping
+            assert(selected_task == self.assigned_tasks[0])
+            self.current_task = self.assigned_tasks.pop(0)
+            self.current_task.processing_start = Sim.env.now
+            
+            processing_time = self.calculate_processing_time(selected_task)
+            # Start processing
+            yield Sim.env.timeout(processing_time)
+            # Finished processing
 
-        print(f"@t={Sim.env.now}, Car {self.id} finished computing Task: {assigned_task.id}!")
+            # Update metrics
+            self.total_processing_time += processing_time
+            self.processed_tasks_count += 1
+            if Sim.env.now - self.current_task.time_of_arrival <= self.current_task.deadline:
+                self.successful_tasks += 1
+
+            print(f"@t={Sim.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
+            self.current_task.processing_end = Sim.env.now
+            Statistics.save_task_stats(self.current_task)
+            self.current_task = None
         self.idle = True
-        Scheduler.remove_from_schedule(self.id)
+        # Scheduler.remove_from_schedule(self.id)
 
     def remove_after_dwell_time(self):
         yield Sim.env.timeout(self.dwell_time)
         Scheduler.unregister_car(self)
+
+    def calculate_waiting_time(self):
+        return sum(task.complexity / self.processing_power for task in self.assigned_tasks)
+
+    def calculate_processing_time(self, task):
+        return task.complexity / self.processing_power
+    
+    def get_remaining_time(self):
+        if self.current_task is None:
+            return 0
+        remaining_time = (self.current_task.complexity / self.processing_power) - (Sim.env.now - self.current_task.processing_start)
+        return remaining_time
 
 class Scheduler:
     cars = list()
@@ -111,11 +142,17 @@ class Scheduler:
             cls.cars.remove(car)
             print(f"Car {car.id} removed from the system at time {Sim.env.now}")
 
-    def pending_tasks_exist(self):
-        return any(car.pending_tasks for car in self.cars)
+    def generated_tasks_exist(self):
+        return any(car.generated_tasks for car in self.cars)
 
-    def get_pending_tasks(self):
-        return [task for car in self.cars for task in car.pending_tasks]
+    def get_generated_tasks(self):
+        return [task for car in self.cars for task in car.generated_tasks]
+    
+    def assigned_tasks_exist(self):
+        return any(task for car in self.cars for task in car.assigned_tasks)
+    
+    def get_assigned_tasks(self):
+        return [task for car in self.cars for task in car.assigned_tasks]
     
     def get_idle_cars(self):
         return [car for car in self.cars if car.idle]
@@ -127,17 +164,17 @@ class Scheduler:
         while True:
             print_color(f"\n================== [Log] time: {Sim.env.now} ==================","93")
             self.print_schedule("Current State")
-            if self.pending_tasks_exist() and self.idle_cars_exist():
+            if self.generated_tasks_exist() and self.idle_cars_exist():
                 for idle_car in self.get_idle_cars():
                     # Check if idle tasks exist. If not, break
-                    if not self.pending_tasks_exist(): break
+                    if not self.generated_tasks_exist(): break
 
-                    selected_task = policy(self.get_pending_tasks())
+                    selected_task = policy(self.get_generated_tasks())
                     print(f"Car {idle_car.id} <-- Task {selected_task.id}")
 
                     # Housekeeping
                     idle_car.idle = False
-                    selected_task.source_car.pending_tasks.remove(selected_task)
+                    selected_task.source_car.generated_tasks.remove(selected_task)
 
                     # Add to schedule
                     self.schedule[idle_car.id] = selected_task
@@ -152,13 +189,51 @@ class Scheduler:
             offset = 0.0001 * random.random()
             yield Sim.env.timeout(1 + offset)  # Check for tasks every unit of time
 
+    def schedule_tasks_exhaust(self, policy):
+        while True:
+            print_color(f"\n================== [Log] time: {Sim.env.now} ==================","93")
+            self.print_schedule("Current State")
+            if self.generated_tasks_exist():
+                for _ in range(len(self.get_generated_tasks())):
+
+                    selected_task = policy(self.get_generated_tasks())
+                    # selected_car = self.cars[0]
+                    selected_car = self.select_car(selected_task)
+
+                    if selected_car:
+                        print(f"Car {selected_car.id} <-- Task {selected_task.id}")
+
+                        # Housekeeping
+                        selected_car.assigned_tasks.append(selected_task) # Assign task to the selected car
+                        selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
+                        selected_car.idle = False
+
+                        # # Add to schedule
+                        # self.schedule[idle_car.id] = selected_task
+
+                        # Spawn processes for processing the tasks
+                        Sim.env.process(selected_car.process_task(selected_task))
+                    else:
+                        print(f"Task {selected_task.id} couldn't be assigned; No resources to process it before deadline!")
+                        if Sim.env.now >= (selected_task.time_of_arrival + selected_task.deadline):
+                            print(f"The deadline of Task {selected_task.id} is in the past; Removing it!")
+                            selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
+
+            # Print state after assignments are finished
+            print_color("----------------------------------------------------","95")
+            self.print_schedule("After Scheduling")
+            offset = 0.00001 * random.random()
+            yield Sim.env.timeout(1 + offset)  # Check for tasks every unit of time
+
     def print_schedule(self, string):
         idle_cars_ids = [car.id for car in self.get_idle_cars()]
-        idle_tasks_ids = [task.id for task in self.get_pending_tasks()]
+        idle_tasks_ids = [task.id for task in self.get_generated_tasks()]
+        assigned_tasks_ids = [task.id for task in self.get_assigned_tasks()]
 
         print(f"\n[{string}:]")
-        print("Idle Cars:", idle_cars_ids)
-        print("Idle Tasks:", idle_tasks_ids)
+        print("Idle Cars:\t", idle_cars_ids)
+        print("Idle Tasks:\t", idle_tasks_ids)
+        print("Assigned Tasks:\t", assigned_tasks_ids)
 
         if not self.__class__.schedule:
             print("\n[The schedule is empty!]\n")
@@ -173,37 +248,38 @@ class Scheduler:
                     print(f"{car_id:6} | {task.id:7} | Task Not Found")
             print("---------------------------\n")
 
-class Policy:
-    @staticmethod
-    def random_policy(tasks):
-        if tasks:
-            return random.choice(tasks)
-        else:
-            return None
+    def select_car(self, task):
+        selected_car = None
+        best_completion_time = float('inf')
 
-    @staticmethod
-    def earliest_deadline(tasks):
-        if tasks:
-            # Select the task with the earliest deadline
-            return min(tasks, key=lambda task: task.deadline)
-        else:
-            return None
+        for car in self.cars:
+            waiting_time = car.get_remaining_time() + car.calculate_waiting_time()
+            processing_time = car.calculate_processing_time(task)
+            completion_time = waiting_time + processing_time
 
-    @staticmethod
-    def highest_priority(tasks):
-        if tasks:
-            # Select the task with the highest priority
-            return min(tasks, key=lambda task: task.priority)
+            print(f"Evaluating Car {car.id} for Task {task.id}:")
+            print(f"  Current Time: {Sim.env.now}")
+            print(f"  Waiting Time: {waiting_time}")
+            print(f"  Processing Time: {processing_time}")
+            print(f"  Completion Time: {completion_time}")
+            print(f"  Task Deadline: {task.deadline}")
+
+            if (Sim.env.now + completion_time) <= (task.time_of_arrival + task.deadline) and completion_time < best_completion_time:
+                selected_car = car
+                best_completion_time = completion_time
+                print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
         else:
-            return None
+                print(f"  -> Car {car.id} not suitable")
+
+        return selected_car
 
 def generate_cars(lambda_rate):
     while True:
-        # yield Sim.env.timeout(random.expovariate(lambda_rate))
         new_car = Car()
         print(f"New Car {new_car.id} added at time {Sim.env.now}")
         new_car.generate_tasks_static(2)
         yield Sim.env.timeout(1)
+        # yield Sim.env.timeout(random.expovariate(lambda_rate))
 
 def generate_cars_by_traces(traces, scheduler, region_of_interest):
     xmin, ymin, xmax, ymax = region_of_interest
@@ -250,12 +326,10 @@ class SumoManager:
 
 class TraciManager:
     def __init__(self):
-        pass
-
-    sumoBinary = "/usr/bin/sumo-gui"
-    sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
-    sumoCmd = [sumoBinary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"]
-    traci.start(sumoCmd)
+        sumoBinary = "/usr/bin/sumo-gui"
+        sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
+        sumoCmd = [sumoBinary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"]
+        traci.start(sumoCmd)
     
     def execute_one_time_step(self):
         rois = [[-50, -10, 50, 10]]
@@ -326,44 +400,45 @@ def just_a_timer():
         yield Sim.env.timeout(1)
 
 def main():
-    # sumo = SumoManager()
-    # sumo.set_sumo_binary("/usr/bin/sumo-gui") # $ which sumo-gui
-    # sumo.set_sumo_config_path(os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')) #change path
-    # sumo.run_sumo_simulation(until= 30)
-    # sumo.print_traces()
-
-    # # env = simpy.Environment()
-    # scheduler = Scheduler()
+    # env = simpy.Environment()
+    scheduler = Scheduler()
 
     # # NOTE: Static car insertion
-    # #car1 = Car()
-    # #car2 = Car()
-    # #car3 = Car()
+    # car1 = Car()
+    # car2 = Car()
+    # car3 = Car()
     # # env.process(car1.generate_task())
     # # env.process(car2.generate_task())
-    # #car1.generate_tasks_static(1)
-    # #car2.generate_tasks_static(1)
+    # car1.generate_tasks_static(2)
+    # car2.generate_tasks_static(1)
 
-    # # NOTE: Dynamic car insertion
-    # # Sim.env.process(generate_cars(lambda_rate=0.5))
-
-    # Sim.env.process(generate_cars_by_traces(sumo.traces, scheduler, (0,0,0,0)))
-
-    # Sim.env.process(scheduler.schedule_tasks(Policy.earliest_deadline))
+    c_g = Car()
+    t1 = Task(c_g)
+    t2 = Task(c_g)
+    c_g.generated_tasks = [t1, t2]
     
-    # # Print metrics
-    # for car in Scheduler.cars:
-    #     print(f"Car {car.id} - Processed Tasks: {car.processed_tasks_count}; "
-    #           f"Successful Tasks: {car.successful_tasks}; "
-    #           f"Total Processing Time: {car.total_processing_time}; "
-    #           f"Lifetime: {Sim.env.now - car.time_of_arrival}")
+    t1.complexity = 4
+    t1.deadline = 10
 
+    t2.complexity = 4
+    t2.deadline = 10
+
+    # NOTE: Dynamic car insertion
+    # Sim.env.process(generate_cars(lambda_rate=0.5))
+
+    # Sim.env.process(scheduler.schedule_tasks_exhaust(Policy.random))
     Sim.env.process(just_a_timer())
     traciMgr = TraciManager()
     Sim.env.process(traciMgr.execute_one_time_step())
+    
+    Sim.env.run(until=30)  # Run the simulation for 20 time units
 
-    Sim.env.run(30)
-    print("End of simulation.")
+    # Print metrics
+    for car in Scheduler.cars:
+        print(f"Car {car.id} - Processed Tasks: {car.processed_tasks_count}; "
+              f"Successful Tasks: {car.successful_tasks}; "
+              f"Total Processing Time: {car.total_processing_time}; "
+              f"Lifetime: {Sim.env.now - car.time_of_arrival}")
 
 if __name__ == "__main__":
     main()
