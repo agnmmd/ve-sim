@@ -1,6 +1,10 @@
-import simpy
+import os
 import random
+
+import simpy
+import simpy.util
 import traci
+import traci.constants as tc
 
 def print_color(string, color_code, argument=""):
         # Black (Gray): 90m
@@ -195,11 +199,11 @@ class Policy:
 
 def generate_cars(lambda_rate):
     while True:
-        yield Sim.env.timeout(1)
         # yield Sim.env.timeout(random.expovariate(lambda_rate))
         new_car = Car()
         print(f"New Car {new_car.id} added at time {Sim.env.now}")
         new_car.generate_tasks_static(2)
+        yield Sim.env.timeout(1)
 
 def generate_cars_by_traces(traces, scheduler, region_of_interest):
     xmin, ymin, xmax, ymax = region_of_interest
@@ -244,40 +248,122 @@ class SumoManager:
             for v_id, pos in cls.traces[step].items():
                 print(f"  Vehicle {v_id}: x: {pos[0]}, y: {pos[1]}")
 
-def main():
-    sumo = SumoManager()
-    sumo.set_sumo_binary("/usr/local/bin/sumo-gui") # $ which sumo-gui
-    sumo.set_sumo_config_path("/Users/Ankai/Desktop/virtual_edge/code/SUMO/street.sumocfg") #change path
-    sumo.run_sumo_simulation(until= 30)
-    sumo.print_traces()
+class TraciManager:
+    def __init__(self):
+        pass
 
-    # env = simpy.Environment()
-    scheduler = Scheduler()
-
-    # NOTE: Static car insertion
-    #car1 = Car()
-    #car2 = Car()
-    #car3 = Car()
-    # env.process(car1.generate_task())
-    # env.process(car2.generate_task())
-    #car1.generate_tasks_static(1)
-    #car2.generate_tasks_static(1)
-
-    # NOTE: Dynamic car insertion
-    # Sim.env.process(generate_cars(lambda_rate=0.5))
-
-    Sim.env.process(generate_cars_by_traces(sumo.traces, scheduler, (0,0,0,0)))
-
-    Sim.env.process(scheduler.schedule_tasks(Policy.earliest_deadline))
+    sumoBinary = "/usr/bin/sumo-gui"
+    sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
+    sumoCmd = [sumoBinary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"]
+    traci.start(sumoCmd)
     
-    Sim.env.run(until=20)  # Run the simulation for 20 time units
+    def execute_one_time_step(self):
+        rois = [[-50, -10, 50, 10]]
+        subscribed_vehicles = {}
+        SPEED_THRESHOLD = 13.0
 
-    # Print metrics
-    for car in Scheduler.cars:
-        print(f"Car {car.id} - Processed Tasks: {car.processed_tasks_count}; "
-              f"Successful Tasks: {car.successful_tasks}; "
-              f"Total Processing Time: {car.total_processing_time}; "
-              f"Lifetime: {Sim.env.now - car.time_of_arrival}")
+        previous_vehicle_ids = set()
+
+        while traci.simulation.getMinExpectedNumber() > 0:
+            traci.simulationStep()
+            yield Sim.env.timeout(1)
+            print("Time in SimPy:", Sim.env.now)
+            simulation_time = traci.simulation.getTime()
+            print("Time in SUMO:", simulation_time)
+
+            if Sim.env.now < 4:
+                pass
+            else:
+                driving_vehicles = set(traci.vehicle.getIDList())
+                
+                for vehicle_id in driving_vehicles:
+                    traci.vehicle.subscribe(vehicle_id, (tc.VAR_SPEED, tc.VAR_POSITION))
+                    subscription_results = traci.vehicle.getSubscriptionResults(vehicle_id)
+                    speed = subscription_results[tc.VAR_SPEED]
+                    position = subscription_results[tc.VAR_POSITION]
+                    print(f"vehicle: {vehicle_id}: speed={speed}, position={position}")
+
+                    if self.inROI(position, rois):
+                        print(f"Vehicle: {vehicle_id} is in ROI!")
+                        subscribed_vehicles[vehicle_id] = subscription_results
+                    else:
+                        if vehicle_id in subscribed_vehicles.keys():
+                            del subscribed_vehicles[vehicle_id]
+
+                # Find vehicles that have left SUMO
+                vehicles_left = previous_vehicle_ids - driving_vehicles
+                if vehicles_left:
+                    print(f"Vehicles that left the simulation at {Sim.env.now}: {vehicles_left}")
+
+                previous_vehicle_ids = driving_vehicles
+
+                for vehicle_id in vehicles_left:
+                    if vehicle_id in subscribed_vehicles.keys():
+                            del subscribed_vehicles[vehicle_id]
+
+                ##################
+                print("Vehicles that we care about, subscribed vehicles:", subscribed_vehicles.keys())
+                print("")
+
+    def inROI(self, point, boxes):
+        # Unpack the point
+        x, y = point
+        
+        # Iterate through each box
+        for box in boxes:
+            min_x, min_y, max_x, max_y = box
+            # Check if the point is within the bounds of the current box
+            if min_x <= x <= max_x and min_y <= y <= max_y:
+                return True
+        
+        # If the point is not in any of the boxes
+        return False
+
+def just_a_timer():
+    """Just a timer that progresses time until the simulation ends"""
+    while True:
+        print("Timer: ", Sim.env.now)
+        yield Sim.env.timeout(1)
+
+def main():
+    # sumo = SumoManager()
+    # sumo.set_sumo_binary("/usr/bin/sumo-gui") # $ which sumo-gui
+    # sumo.set_sumo_config_path(os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')) #change path
+    # sumo.run_sumo_simulation(until= 30)
+    # sumo.print_traces()
+
+    # # env = simpy.Environment()
+    # scheduler = Scheduler()
+
+    # # NOTE: Static car insertion
+    # #car1 = Car()
+    # #car2 = Car()
+    # #car3 = Car()
+    # # env.process(car1.generate_task())
+    # # env.process(car2.generate_task())
+    # #car1.generate_tasks_static(1)
+    # #car2.generate_tasks_static(1)
+
+    # # NOTE: Dynamic car insertion
+    # # Sim.env.process(generate_cars(lambda_rate=0.5))
+
+    # Sim.env.process(generate_cars_by_traces(sumo.traces, scheduler, (0,0,0,0)))
+
+    # Sim.env.process(scheduler.schedule_tasks(Policy.earliest_deadline))
+    
+    # # Print metrics
+    # for car in Scheduler.cars:
+    #     print(f"Car {car.id} - Processed Tasks: {car.processed_tasks_count}; "
+    #           f"Successful Tasks: {car.successful_tasks}; "
+    #           f"Total Processing Time: {car.total_processing_time}; "
+    #           f"Lifetime: {Sim.env.now - car.time_of_arrival}")
+
+    Sim.env.process(just_a_timer())
+    traciMgr = TraciManager()
+    Sim.env.process(traciMgr.execute_one_time_step())
+
+    Sim.env.run(30)
+    print("End of simulation.")
 
 if __name__ == "__main__":
     main()
