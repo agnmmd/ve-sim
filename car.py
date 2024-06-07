@@ -1,0 +1,82 @@
+from sim import Sim
+from scheduler import Scheduler
+from stats import Statistics
+from task import Task
+import simpy
+import random
+
+class Car:
+    def __init__(self):
+        self.id = "c" + str(Sim.set_car_id())
+        self.generated_tasks = []
+        self.processing_power = 2
+        self.idle = True
+        self.dwell_time = 10
+        self.assigned_tasks = []
+        self.processor = simpy.Resource(Sim.env, capacity=1)
+        self.current_task = None
+
+        # Statistics
+        self.successful_tasks = 0
+        self.total_processing_time = 0
+        self.processed_tasks_count = 0
+        self.time_of_arrival = Sim.env.now
+
+        # Initilization
+        Scheduler.register_car(self)
+        Sim.env.process(self.remove_after_dwell_time())
+
+    def generate_task(self):
+        while True:
+            yield Sim.env.timeout(random.expovariate(1.0/5))
+            task = Task(self)
+            self.generated_tasks.append(task)
+            print(f"Car {self.id} generated a Task: {task.__dict__}")
+
+    def generate_tasks_static(self, num_tasks):
+        self.generated_tasks = [Task(self) for _ in range(num_tasks)]
+        for task in self.generated_tasks:
+            print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
+
+    def process_task(self, selected_task):
+        with self.processor.request() as req:
+            yield req
+
+            # Housekeeping
+            assert(selected_task == self.assigned_tasks[0])
+            self.current_task = self.assigned_tasks.pop(0)
+            self.current_task.processing_start = Sim.env.now
+            
+            processing_time = self.calculate_processing_time(selected_task)
+            # Start processing
+            yield Sim.env.timeout(processing_time)
+            # Finished processing
+
+            # Update metrics
+            self.total_processing_time += processing_time
+            self.processed_tasks_count += 1
+            if Sim.env.now - self.current_task.time_of_arrival <= self.current_task.deadline:
+                self.successful_tasks += 1
+
+            print(f"@t={Sim.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
+            self.current_task.processing_end = Sim.env.now
+            Statistics.save_task_stats(self.current_task)
+            self.current_task = None
+        self.idle = True
+        # Scheduler.remove_from_schedule(self.id)
+
+    def remove_after_dwell_time(self):
+        yield Sim.env.timeout(self.dwell_time)
+        Scheduler.unregister_car(self)
+
+    def calculate_waiting_time(self):
+        return sum(task.complexity / self.processing_power for task in self.assigned_tasks)
+
+    def calculate_processing_time(self, task):
+        return task.complexity / self.processing_power
+    
+    def get_remaining_time(self):
+        if self.current_task is None:
+            return 0
+        remaining_time = (self.current_task.complexity / self.processing_power) - (Sim.env.now - self.current_task.processing_start)
+        return remaining_time
