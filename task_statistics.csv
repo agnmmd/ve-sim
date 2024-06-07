@@ -1,6 +1,0 @@
-Task ID,Source Car ID,Time of Arrival,Deadline,Priority,Complexity,Processing Start,Processing End
-t2,c1,0,10,0,4,0,2.0
-t1,c1,0,10,0,4,2.0,4.0
-t1,c1,0,2,0,2,0,1.0
-t2,c1,0,2,0,2,0,1.0
-t3,c2,0,2,2,2,0,1.0
