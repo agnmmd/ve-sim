@@ -57,6 +57,8 @@ class TraciManager:
                 ##################
                 print("Vehicles that we care about, subscribed vehicles:", subscribed_vehicles.keys())
                 print("")
+        traci.close()
+        print("TraCI disconnected")
 
     def inROI(self, point, boxes):
         # Unpack the point
