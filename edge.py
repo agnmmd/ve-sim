@@ -173,8 +173,9 @@ class Scheduler:
                     print(f"Car {idle_car.id} <-- Task {selected_task.id}")
 
                     # Housekeeping
-                    idle_car.idle = False
+                    idle_car.assigned_tasks.append(selected_task)
                     selected_task.source_car.generated_tasks.remove(selected_task)
+                    idle_car.idle = False
 
                     # Add to schedule
                     self.schedule[idle_car.id] = selected_task
