@@ -70,6 +70,10 @@ def main():
     # Sim.env.process(just_a_timer())
     # traciMgr = TraciManager()
     # Sim.env.process(traciMgr.execute_one_time_step())
+    # sumo_binary = "/usr/bin/sumo-gui"
+    # sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
+    # sumo_cmd = [sumo_binary, "-c", sumo_cfg] #, "--quit-on-end"]#, "--start"])
+    # traci.start(sumo_cmd)
     ##################################################
     
     Sim.env.run(until=30)  # Run the simulation for 20 time units

@@ -5,10 +5,6 @@ import os
 
 class TraciManager:
     def __init__(self):
-        sumoBinary = "/usr/bin/sumo-gui"
-        sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
-        sumoCmd = [sumoBinary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"]
-        traci.start(sumoCmd)
     
     def execute_one_time_step(self):
         rois = [[-50, -10, 50, 10]]
