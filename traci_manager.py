@@ -1,11 +1,11 @@
 from sim import Sim
 import traci
 import traci.constants as tc
-import os
 
 class TraciManager:
-    def __init__(self):
-    
+    def __init__(self, env):
+        self.env = env
+
     def execute_one_time_step(self):
         rois = [[-50, -10, 50, 10]]
         subscribed_vehicles = {}
@@ -15,12 +15,12 @@ class TraciManager:
 
         while traci.simulation.getMinExpectedNumber() > 0:
             traci.simulationStep()
-            yield Sim.env.timeout(1)
-            print("Time in SimPy:", Sim.env.now)
+            yield self.env.timeout(1)
+            print("Time in SimPy:", self.env.now)
             simulation_time = traci.simulation.getTime()
             print("Time in SUMO:", simulation_time)
 
-            if Sim.env.now < 4:
+            if self.env.now < 4:
                 pass
             else:
                 driving_vehicles = set(traci.vehicle.getIDList())
@@ -42,13 +42,13 @@ class TraciManager:
                 # Find vehicles that have left SUMO
                 vehicles_left = previous_vehicle_ids - driving_vehicles
                 if vehicles_left:
-                    print(f"Vehicles that left the simulation at {Sim.env.now}: {vehicles_left}")
+                    print(f"Vehicles that left the simulation at {self.env.now}: {vehicles_left}")
 
                 previous_vehicle_ids = driving_vehicles
 
                 for vehicle_id in vehicles_left:
                     if vehicle_id in subscribed_vehicles.keys():
-                            del subscribed_vehicles[vehicle_id]
+                        del subscribed_vehicles[vehicle_id]
 
                 ##################
                 print("Vehicles that we care about, subscribed vehicles:", subscribed_vehicles.keys())

@@ -1,24 +1,23 @@
-from sim import Sim
 from utils import print_color
 import random
 
 class Scheduler:
-    cars = list()
-    schedule = dict()
+    def __init__(self, env) -> None:
+        self.env = env
+        self.cars = list()
+        self.schedule = dict()
 
     @classmethod
     def remove_from_schedule(cls, car_id):
         del cls.schedule[car_id]
 
-    @classmethod
-    def register_car(cls, car):
-        cls.cars.append(car)
+    def register_car(self, car):
+        self.cars.append(car)
 
-    @classmethod
-    def unregister_car(cls, car):
-        if car in cls.cars:
-            cls.cars.remove(car)
-            print(f"Car {car.id} removed from the system at time {Sim.env.now}")
+    def unregister_car(self, car):
+        if car in self.cars:
+            self.cars.remove(car)
+            print(f"Car {car.id} removed from the system at time {self.env.now}")
 
     def generated_tasks_exist(self):
         return any(car.generated_tasks for car in self.cars)
@@ -40,7 +39,7 @@ class Scheduler:
 
     def schedule_tasks(self, policy):
         while True:
-            print_color(f"\n================== [Log] time: {Sim.env.now} ==================","93")
+            print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
             if self.generated_tasks_exist() and self.idle_cars_exist():
                 for idle_car in self.get_idle_cars():
@@ -59,18 +58,18 @@ class Scheduler:
                     self.schedule[idle_car.id] = selected_task
 
                     # Processing the task
-                    Sim.env.process(idle_car.process_task(selected_task))
+                    self.env.process(idle_car.process_task(selected_task))
 
             # Print state after assignments are finished
             print_color("----------------------------------------------------","95")
             self.print_schedule("After Scheduling")
-            # print_color(f"\n================== [End] time: {Sim.env.now} ==================","93")
+            # print_color(f"\n================== [End] time: {self.env.now} ==================","93")
             offset = 0.0001 * random.random()
-            yield Sim.env.timeout(1 + offset)  # Check for tasks every unit of time
+            yield self.env.timeout(1 + offset)  # Check for tasks every unit of time
 
     def schedule_tasks_exhaust(self, policy):
         while True:
-            print_color(f"\n================== [Log] time: {Sim.env.now} ==================","93")
+            print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
             if self.generated_tasks_exist():
                 for _ in range(len(self.get_generated_tasks())):
@@ -91,10 +90,10 @@ class Scheduler:
                         # self.schedule[idle_car.id] = selected_task
 
                         # Spawn processes for processing the tasks
-                        Sim.env.process(selected_car.process_task(selected_task))
+                        self.env.process(selected_car.process_task(selected_task))
                     else:
                         print(f"Task {selected_task.id} couldn't be assigned; No resources to process it before deadline!")
-                        if Sim.env.now >= (selected_task.time_of_arrival + selected_task.deadline):
+                        if self.env.now >= (selected_task.time_of_arrival + selected_task.deadline):
                             print(f"The deadline of Task {selected_task.id} is in the past; Removing it!")
                             selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
 
@@ -102,7 +101,7 @@ class Scheduler:
             print_color("----------------------------------------------------","95")
             self.print_schedule("After Scheduling")
             offset = 0.00001 * random.random()
-            yield Sim.env.timeout(1 + offset)  # Check for tasks every unit of time
+            yield self.env.timeout(1 + offset)  # Check for tasks every unit of time
 
     def print_schedule(self, string):
         idle_cars_ids = [car.id for car in self.get_idle_cars()]
@@ -114,13 +113,13 @@ class Scheduler:
         print("Idle Tasks:\t", idle_tasks_ids)
         print("Assigned Tasks:\t", assigned_tasks_ids)
 
-        if not self.__class__.schedule:
+        if not self.schedule:
             print("\n[The schedule is empty!]\n")
         else:
             print("\n---------------------------")
             print("car_id | task_id | deadline")
             print("---------------------------")
-            for car_id, task in self.__class__.schedule.items():
+            for car_id, task in self.schedule.items():
                 if task:
                     print(f"{car_id:6} | {task.id:7} | {'X' * int(task.deadline)}")
                 else:
@@ -137,13 +136,13 @@ class Scheduler:
             completion_time = waiting_time + processing_time
 
             print(f"Evaluating Car {car.id} for Task {task.id}:")
-            print(f"  Current Time: {Sim.env.now}")
+            print(f"  Current Time: {self.env.now}")
             print(f"  Waiting Time: {waiting_time}")
             print(f"  Processing Time: {processing_time}")
             print(f"  Completion Time: {completion_time}")
             print(f"  Task Deadline: {task.deadline}")
 
-            if (Sim.env.now + completion_time) <= (task.time_of_arrival + task.deadline) and completion_time < best_completion_time:
+            if (self.env.now + completion_time) <= (task.time_of_arrival + task.deadline) and completion_time < best_completion_time:
                 selected_car = car
                 best_completion_time = completion_time
                 print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")

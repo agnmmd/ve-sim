@@ -4,58 +4,62 @@ from task import Task
 from scheduler import Scheduler
 from traci_manager import TraciManager
 from policy import Policy
+import traci
+import os
+import simpy
 
-def generate_cars(lambda_rate):
+def generate_cars(env, sim, scheduler):
     while True:
-        new_car = Car()
-        print(f"New Car {new_car.id} added at time {Sim.env.now}")
+        new_car = Car(env, sim, scheduler)
+        print(f"New Car {new_car.id} added at time {env.now}")
         new_car.generate_tasks_static(2)
-        yield Sim.env.timeout(1)
+        yield env.timeout(1)
         # yield Sim.env.timeout(random.expovariate(lambda_rate))
 
-def generate_cars_by_traces(traces, scheduler, region_of_interest):
-    xmin, ymin, xmax, ymax = region_of_interest
-    for car_id in traces[Sim.env.now].items():
-        if car_id not in [car.id for car in scheduler.cars]:
-            new_car = Car()
-            print(f"New Car {new_car.id} added at time {Sim.env.now}")
-            new_car.generate_tasks_static(2)
+# def generate_cars_by_traces(traces, scheduler, region_of_interest):
+#     xmin, ymin, xmax, ymax = region_of_interest
+#     for car_id in traces[Sim.env.now].items():
+#         if car_id not in [car.id for car in scheduler.cars]:
+#             new_car = Car()
+#             print(f"New Car {new_car.id} added at time {Sim.env.now}")
+#             new_car.generate_tasks_static(2)
 
-    yield Sim.env.timeout(1)
-    # TODO: only register car in scheduler, if is ROI and unregister if not in ROI
+#     yield Sim.env.timeout(1)
+#     # TODO: only register car in scheduler, if is ROI and unregister if not in ROI
 
-def just_a_timer():
+def just_a_timer(env):
     """Just a timer that progresses time until the simulation ends"""
     while True:
-        print("Timer: ", Sim.env.now)
-        yield Sim.env.timeout(1)
+        print("Timer: ", env.now)
+        yield env.timeout(1)
 
 def main():
-    # env = simpy.Environment()
-    scheduler = Scheduler()
+    env = simpy.Environment()
+    sim = Sim()
+    scheduler = Scheduler(env)
 
     ##################################################
-    # # NOTE: Static car insertion
-    # car1 = Car()
-    # car2 = Car()
-    # car3 = Car()
-    # # env.process(car1.generate_task())
-    # # env.process(car2.generate_task())
-    # car1.generate_tasks_static(2)
-    # car2.generate_tasks_static(1)
-    # Sim.env.process(scheduler.schedule_tasks(Policy.random))
+    # NOTE: Static car insertion
+    car1 = Car(env, sim, scheduler)
+    car2 = Car(env, sim, scheduler)
+    car3 = Car(env, sim, scheduler)
+    # env.process(car1.generate_task())
+    # env.process(car2.generate_task())
+    car1.generate_tasks_static(2)
+    car2.generate_tasks_static(1)
+    env.process(scheduler.schedule_tasks(Policy.random))
     ##################################################
 
     ##################################################
     # # NOTE: Dynamic car insertion
-    # Sim.env.process(generate_cars(lambda_rate=0.5))
+    # env.process(generate_cars(env, sim, scheduler))
     ##################################################
 
     ##################################################
-    # c_g = Car()
-    # t1 = Task(c_g)
-    # t2 = Task(c_g)
-    # c_g.generated_tasks = [t1, t2]
+    # car = Car(env, sim, scheduler)
+    # t1 = Task(env, sim, car)
+    # t2 = Task(env, sim, car)
+    # car.generated_tasks = [t1, t2]
     
     # t1.complexity = 4
     # t1.deadline = 10
@@ -63,28 +67,29 @@ def main():
     # t2.complexity = 4
     # t2.deadline = 10
 
-    # Sim.env.process(scheduler.schedule_tasks_exhaust(Policy.random))
+    # env.process(scheduler.schedule_tasks_exhaust(Policy.random))
     ##################################################
     
     ##################################################
-    # Sim.env.process(just_a_timer())
-    # traciMgr = TraciManager()
-    # Sim.env.process(traciMgr.execute_one_time_step())
+    # env.process(just_a_timer(env))
+    
+    # traci_mgr = TraciManager(env)
     # sumo_binary = "/usr/bin/sumo-gui"
     # sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
     # sumo_cmd = [sumo_binary, "-c", sumo_cfg] #, "--quit-on-end"]#, "--start"])
     # traci.start(sumo_cmd)
+    
+    # env.process(traci_mgr.execute_one_time_step())
     ##################################################
     
-    Sim.env.run(until=30)  # Run the simulation for 20 time units
+    env.run(until=30)  
 
     # Print metrics
-    for car in Scheduler.cars:
+    for car in scheduler.cars:
         print(f"Car {car.id} - Processed Tasks: {car.processed_tasks_count}; "
               f"Successful Tasks: {car.successful_tasks}; "
               f"Total Processing Time: {car.total_processing_time}; "
-              f"Lifetime: {Sim.env.now - car.time_of_arrival}")
-
+              f"Lifetime: {env.now - car.time_of_arrival}")    
 if __name__ == "__main__":
     main()
 
