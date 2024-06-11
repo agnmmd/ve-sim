@@ -90,8 +90,11 @@ def main():
               f"Successful Tasks: {car.successful_tasks}; "
               f"Total Processing Time: {car.total_processing_time}; "
               f"Lifetime: {env.now - car.time_of_arrival}")    
+        
 if __name__ == "__main__":
-    main()
+    for x in Policy.get_policies():
+        print(x)
+        main()
 
 # Waiting time, migration time, dwell time
 

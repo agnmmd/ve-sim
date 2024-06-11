@@ -39,3 +39,9 @@ class Policy:
             return min(tasks, key=lambda task: task.complexity)
         else:
             return None
+        
+    @classmethod
+    def get_policies(cls):
+        # Get all static methods from the Policy class
+        policies = [method for method in dir(cls) if callable(getattr(cls, method)) and not method.startswith("__")]
+        return [getattr(cls, method) for method in policies]
