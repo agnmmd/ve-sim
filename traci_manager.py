@@ -6,6 +6,7 @@ class TraciManager:
     def __init__(self, env):
         self.env = env
 
+        self.rois = []
     def execute_one_time_step(self):
 
         previous_vehicle_ids = set()
@@ -66,5 +67,9 @@ class TraciManager:
         
         # If the point is not in any of the boxes
         return False
+
+    def set_rois(self, rois):
+        self.rois = rois
+
     def get_subscribed_vehicles_list(self):
         return self.subscribed_vehicles_list
