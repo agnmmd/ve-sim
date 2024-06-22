@@ -4,7 +4,7 @@ import simpy
 import random
 
 class Car:
-    def __init__(self, env, sim, scheduler):
+    def __init__(self, env, sim, speed = None, position = None):
         self.env = env
         self.sim = sim
 
@@ -24,14 +24,17 @@ class Car:
         self.time_of_arrival = self.env.now
 
 
-    def generate_task(self):
+    def generate_tasks(self):
         while True:
             yield self.env.timeout(random.expovariate(1.0/5))
-            task = Task(self)
+            task = Task(self.env, self.sim, self)
             self.generated_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
 
     def generate_tasks_static(self, num_tasks):
+        """
+        Tasks generated with this method will have the same time of arrival (TOA)
+        """
         self.generated_tasks = [Task(self.env, self.sim, self) for _ in range(num_tasks)]
         for task in self.generated_tasks:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")

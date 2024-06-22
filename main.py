@@ -101,13 +101,14 @@ if __name__ == "__main__":
         print(x)
         main()
 
-# Waiting time, migration time, dwell time
 
-# TODO: Add a finish() method to store all the statistics in the end in a structured way
 
 # TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
 # TODO: Optional: Use the schedule as a log for the schedule mapping (car, time) to task.
 
 # NOTE: Due to the order of the iteration there is an order of tasks. Car 0 might be favored.
 # NOTE: A task should be at one entity, there should not be multiple copies of a task; 
-# Do not use the task queue for assigning tasks. Because a task is both present in Scheduler's queue and in a Car's queue. This is not singularity. Multiple copies of the same entity is not good...
+# NOTE: Initiation of the tasks currently is happening in the Traci; Alternative: move to __init__ of Car?
+# NOTE: A record of the the car that processes a task is not stored in the Task object for Statistic purposes. Maybe integrate.
+# NOTE: Currently the Stats module exists separately, maybe create the Stats module inside Sim in the constructor...
+# NOTE: Sim configuration is updated with e staticmethod. Maybe generate a Sim() object with all necessary config parameters in the constuctor.

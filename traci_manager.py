@@ -1,14 +1,17 @@
-from sim import Sim
 import traci
 import traci.constants as tc
+from car import Car
 
 class TraciManager:
-    def __init__(self, env):
+    def __init__(self, env, sim):
         self.env = env
+        self.sim = sim
 
         self.rois = []
-    def execute_one_time_step(self):
+        self.subscribed_vehicles = {}
+        self.subscribed_vehicles_list = []
 
+    def execute_one_time_step(self):
         previous_vehicle_ids = set()
 
         while traci.simulation.getMinExpectedNumber() > 0:
