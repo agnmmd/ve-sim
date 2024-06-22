@@ -37,6 +37,11 @@ def main():
     env = simpy.Environment()
     sim = Sim()
     scheduler = Scheduler(env)
+    traci_mgr = TraciManager(env, sim)
+    # traci_mgr.set_rois([(-50, -10, 50, 10)])
+    sumo_binary = "/usr/bin/sumo"
+    sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg] #, "--quit-on-end"]#, "--start"])
 
     ##################################################
     # NOTE: Static car insertion

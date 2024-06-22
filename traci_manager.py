@@ -7,9 +7,6 @@ class TraciManager:
         self.env = env
 
     def execute_one_time_step(self):
-        rois = [[-50, -10, 50, 10]]
-        subscribed_vehicles = {}
-        SPEED_THRESHOLD = 13.0
 
         previous_vehicle_ids = set()
 
