@@ -2,14 +2,14 @@ import random
 
 class Policy:
     @staticmethod
-    def random(tasks):
+    def p_random(tasks):
         if tasks:
             return random.choice(tasks)
         else:
             return None
 
     @staticmethod
-    def shortest_deadline(tasks):
+    def p_shortest_deadline(tasks):
         if tasks:
             # Select the task with the shortest deadline
             return min(tasks, key=lambda task: task.deadline)
@@ -17,7 +17,7 @@ class Policy:
             return None
 
     @staticmethod
-    def highest_priority(tasks):
+    def p_highest_priority(tasks):
         if tasks:
             # Select the task with the highest priority
             return min(tasks, key=lambda task: task.priority)
@@ -25,7 +25,7 @@ class Policy:
             return None
         
     @staticmethod
-    def earliest_deadline(tasks):
+    def p_earliest_deadline(tasks):
         if tasks:
             # Select the task with the soonest deadline
             return min(tasks, key=lambda task: task.time_of_arrival + task.deadline)
@@ -33,7 +33,7 @@ class Policy:
             return None
         
     @staticmethod
-    def lowest_complexity(tasks):
+    def p_lowest_complexity(tasks):
         if tasks:
             # Select the task with the lowest complexity
             return min(tasks, key=lambda task: task.complexity)
@@ -42,6 +42,9 @@ class Policy:
         
     @classmethod
     def get_policies(cls):
+        """
+        Returns a dictionary of policy_name : policy_callable_function pairs
+        """
         # Get all static methods from the Policy class
-        policies = [method for method in dir(cls) if callable(getattr(cls, method)) and not method.startswith("__")]
-        return [getattr(cls, method) for method in policies]
+        policies = [method for method in dir(cls) if callable(getattr(cls, method)) and method.startswith("p")]
+        return [getattr(cls, policy_name) for policy_name in policies]
