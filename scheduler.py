@@ -2,22 +2,16 @@ from utils import print_color
 import random
 
 class Scheduler:
-    def __init__(self, env) -> None:
+    def __init__(self, env, traci) -> None:
         self.env = env
+        self.traci = traci
         self.cars = list()
         self.schedule = dict()
+        self.static_cars = []
 
     @classmethod
     def remove_from_schedule(cls, car_id):
         del cls.schedule[car_id]
-
-    def register_car(self, car):
-        self.cars.append(car)
-
-    def unregister_car(self, car):
-        if car in self.cars:
-            self.cars.remove(car)
-            print(f"Car {car.id} removed from the system at time {self.env.now}")
 
     def generated_tasks_exist(self):
         return any(car.generated_tasks for car in self.cars)
@@ -39,6 +33,7 @@ class Scheduler:
 
     def schedule_tasks(self, policy):
         while True:
+            self.cars = self.static_cars + list(self.traci.get_subscribed_vehicles_list())
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
             if self.generated_tasks_exist() and self.idle_cars_exist():
@@ -69,6 +64,8 @@ class Scheduler:
 
     def schedule_tasks_exhaust(self, policy):
         while True:
+            # Merge cars that have been added statically and cars added by TraCI
+            self.cars = self.static_cars + list(self.traci.get_subscribed_vehicles_list())
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
             if self.generated_tasks_exist():
@@ -150,3 +147,20 @@ class Scheduler:
                 print(f"  -> Car {car.id} not suitable")
 
         return selected_car
+
+    def register_static_car(self, cars_list, remove_after_dwell_time=False):
+        for car in cars_list:
+            self.static_cars.append(car)
+
+            if(remove_after_dwell_time):
+                self.env.process(self.remove_after_dwell_time(car))
+
+    def unregister_static_car(self, car):
+        if car in self.static_cars:
+            self.static_cars.remove(car)
+            print(f"Car {car.id} removed from the system at time {self.env.now}")
+
+    def remove_after_dwell_time(self, car):
+        yield self.env.timeout(car.dwell_time)
+        self.scheduler.unregister_car(self)
+        car.finish()

@@ -69,3 +69,5 @@ class TraciManager:
         
         # If the point is not in any of the boxes
         return False
+    def get_subscribed_vehicles_list(self):
+        return self.subscribed_vehicles_list

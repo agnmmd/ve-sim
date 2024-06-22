@@ -7,7 +7,6 @@ class Car:
     def __init__(self, env, sim, scheduler):
         self.env = env
         self.sim = sim
-        self.scheduler = scheduler
 
         self.id = "c" + str(self.sim.set_car_id())
         self.generated_tasks = []
@@ -24,9 +23,6 @@ class Car:
         self.processed_tasks_count = 0
         self.time_of_arrival = self.env.now
 
-        # Initilization
-        self.scheduler.register_car(self)
-        self.env.process(self.remove_after_dwell_time())
 
     def generate_task(self):
         while True:
@@ -65,11 +61,6 @@ class Car:
             Statistics.save_task_stats(self.current_task)
             self.current_task = None
         self.idle = True
-        # Scheduler.remove_from_schedule(self.id)
-
-    def remove_after_dwell_time(self):
-        yield self.env.timeout(self.dwell_time)
-        self.scheduler.unregister_car(self)
 
     def calculate_waiting_time(self):
         return sum(task.complexity / self.processing_power for task in self.assigned_tasks)
