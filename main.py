@@ -33,9 +33,10 @@ def just_a_timer(env):
         print("Timer: ", env.now)
         yield env.timeout(1)
 
-def main():
+def run_sim(policy_func, run=-1, repetition=-1):
     env = simpy.Environment()
     sim = Sim()
+    Sim.update_sim_variables(run=run, repetition=repetition, policy_function=policy_func)
     scheduler = Scheduler(env)
     traci_mgr = TraciManager(env, sim)
     # traci_mgr.set_rois([(-50, -10, 50, 10)])
@@ -102,8 +103,10 @@ def main():
 if __name__ == "__main__":
     for x in Policy.get_policies():
         print(x)
-        main()
+            run_sim(policy_func, run, repetition)
 
+    # Executing single scenario
+    # run_sim(policy_func=Policy.p_random)
 
 
 # TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
