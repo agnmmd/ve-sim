@@ -61,7 +61,7 @@ class Car:
 
             print(f"@t={self.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
             self.current_task.processing_end = self.env.now
-            Statistics.save_task_stats(self.current_task)
+            Statistics.save_task_stats(self.current_task, self.id)
             self.current_task = None
         self.idle = True
 
@@ -76,3 +76,5 @@ class Car:
             return 0
         remaining_time = (self.current_task.complexity / self.processing_power) - (self.env.now - self.current_task.processing_start)
         return remaining_time
+    def finish(self):
+        Statistics.save_car_stats(self, self.env.now)

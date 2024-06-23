@@ -95,6 +95,9 @@ def main():
               f"Successful Tasks: {car.successful_tasks}; "
               f"Total Processing Time: {car.total_processing_time}; "
               f"Lifetime: {env.now - car.time_of_arrival}")    
+    # Print statistics for static cars that haven't been removed by dwell time
+    for car in scheduler.static_cars:
+        car.finish()
         
 if __name__ == "__main__":
     for x in Policy.get_policies():
