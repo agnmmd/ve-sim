@@ -33,14 +33,19 @@ class TraciManager:
                     position = subscription_results[tc.VAR_POSITION]
                     print(f"vehicle: {vehicle_id}: speed={speed}, position={position}")
 
-                    if self.inROI(position, rois):
+                    # Subscribe to all vehicles if no ROI is set; Check if the vehicle is in ROI
+                    if not self.rois or self.inROI(position, self.rois):
                         print(f"Vehicle: {vehicle_id} is in ROI!")
-                        subscribed_vehicles[vehicle_id] = subscription_results
+                        if vehicle_id not in self.subscribed_vehicles:
+                            self.subscribed_vehicles[vehicle_id] = Car(self.env, self.sim, speed=speed, position=position)
+                            self.subscribed_vehicles[vehicle_id].generate_tasks_static(1)
+                            # self.env.process(self.subscribed_vehicles[vehicle_id].generate_tasks())
                         else:
                             self.subscribed_vehicles[vehicle_id].update(speed=speed, position=position)
                     else:
-                        if vehicle_id in subscribed_vehicles.keys():
-                            del subscribed_vehicles[vehicle_id]
+                        # If the vehicle is not in ROI anymore, remove it from subscribed_vehicles
+                        if vehicle_id in self.subscribed_vehicles:
+                            del self.subscribed_vehicles[vehicle_id]
 
                 # Find vehicles that have left SUMO
                 vehicles_left = previous_vehicle_ids - driving_vehicles
@@ -50,11 +55,15 @@ class TraciManager:
                 previous_vehicle_ids = driving_vehicles
 
                 for vehicle_id in vehicles_left:
-                    if vehicle_id in subscribed_vehicles.keys():
-                        del subscribed_vehicles[vehicle_id]
+                    # Print statistics
+                    self.subscribed_vehicles[vehicle_id].finish()
+                    # Remove from the dictionary vehicle_id:vehicle object
+                    del self.subscribed_vehicles[vehicle_id]
 
-                ##################
-                print("Vehicles that we care about, subscribed vehicles:", subscribed_vehicles.keys())
+                self.subscribed_vehicles_list = self.subscribed_vehicles.values()
+                print("Test:", self.subscribed_vehicles_list)
+
+                print("Vehicles that we care about, subscribed vehicles:", self.subscribed_vehicles.keys())
                 print("")
         traci.close()
         print("TraCI disconnected")
