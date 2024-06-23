@@ -36,6 +36,8 @@ class TraciManager:
                     if self.inROI(position, rois):
                         print(f"Vehicle: {vehicle_id} is in ROI!")
                         subscribed_vehicles[vehicle_id] = subscription_results
+                        else:
+                            self.subscribed_vehicles[vehicle_id].update(speed=speed, position=position)
                     else:
                         if vehicle_id in subscribed_vehicles.keys():
                             del subscribed_vehicles[vehicle_id]

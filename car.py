@@ -17,12 +17,15 @@ class Car:
         self.processor = simpy.Resource(self.env, capacity=1)
         self.current_task = None
 
+        # Mobility
+        self.speed = speed
+        self.position = position
+
         # Statistics
         self.successful_tasks = 0
         self.total_processing_time = 0
         self.processed_tasks_count = 0
         self.time_of_arrival = self.env.now
-
 
     def generate_tasks(self):
         while True:
@@ -76,5 +79,10 @@ class Car:
             return 0
         remaining_time = (self.current_task.complexity / self.processing_power) - (self.env.now - self.current_task.processing_start)
         return remaining_time
+
+    def update(self, speed, position):
+        self.speed = speed
+        self.position = position
+
     def finish(self):
         Statistics.save_car_stats(self, self.env.now)
