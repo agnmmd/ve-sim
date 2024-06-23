@@ -100,9 +100,14 @@ def run_sim(policy_func, run=-1, repetition=-1):
         car.finish()
         
 if __name__ == "__main__":
-    for x in Policy.get_policies():
-        print(x)
+    # Executing multiple simulation for each different policy
+    run = 0
+    repeat = 1
+    for repetition in range(repeat):
+        for policy_func in Policy.get_policies():
+            print(run, repetition, policy_func)
             run_sim(policy_func, run, repetition)
+            run += 1
 
     # Executing single scenario
     # run_sim(policy_func=Policy.p_random)
