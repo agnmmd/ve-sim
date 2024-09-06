@@ -81,6 +81,7 @@ class Scheduler:
                         # Housekeeping
                         selected_car.assigned_tasks.append(selected_task) # Assign task to the selected car
                         selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
+                        selected_task.status = 1
                         selected_car.idle = False
 
                         # # Add to schedule

@@ -50,6 +50,7 @@ class Car:
             assert(selected_task == self.assigned_tasks[0])
             self.current_task = self.assigned_tasks.pop(0)
             self.current_task.processing_start = self.env.now
+            self.current_task.status = 2
             
             processing_time = self.calculate_processing_time(selected_task)
             # Start processing
@@ -85,4 +86,15 @@ class Car:
         self.position = position
 
     def finish(self):
+        """
+        This function is called in the end of the lifetime of a vehicle.
+        For static vehicles: When the dwell time expires
+        For dynamic vehicles: When they leave the scenario (traci)
+        """
         Statistics.save_car_stats(self, self.env.now)
+
+        for t in self.assigned_tasks:
+            Statistics.save_task_stats(t, "NA")
+
+        for t in self.generated_tasks:
+            Statistics.save_task_stats(t, "NA")
