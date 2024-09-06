@@ -16,7 +16,7 @@ class Task:
 
         # Statistic
         # A task can have status
-        # 0 = generated
+        # 0 = generated / never assigned
         # 1 = assigned
         # 2 = processed
         self.status = 0

@@ -44,7 +44,7 @@ class Car:
 
     def process_task(self, selected_task):
         with self.processor.request() as req:
-            yield req
+            yield req   # Wait to acquire the requested resource
 
             # Housekeeping
             assert(selected_task == self.assigned_tasks[0])
