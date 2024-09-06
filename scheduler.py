@@ -140,7 +140,7 @@ class Scheduler:
             print(f"  Completion Time: {completion_time}")
             print(f"  Task Deadline: {task.deadline}")
 
-            if (self.env.now + completion_time) <= (task.time_of_arrival + task.deadline) and completion_time < best_completion_time:
+            if ((self.env.now + completion_time) <= (task.time_of_arrival + task.deadline)) and (completion_time < best_completion_time):
                 selected_car = car
                 best_completion_time = completion_time
                 print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
@@ -163,5 +163,5 @@ class Scheduler:
 
     def remove_after_dwell_time(self, car):
         yield self.env.timeout(car.dwell_time)
-        self.scheduler.unregister_car(self)
+        self.unregister_static_car(car)
         car.finish()

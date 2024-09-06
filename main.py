@@ -41,9 +41,11 @@ def run_sim(policy_func, run=-1, repetition=-1):
 
     traci_mgr = TraciManager(env, sim)
     # traci_mgr.set_rois([(-50, -10, 50, 10)])
-    sumo_binary = "/usr/bin/sumo"
+    sumo_binary = "/usr/bin/sumo-gui"
     sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
-    sumo_cmd = [sumo_binary, "-c", sumo_cfg] #, "--quit-on-end"]#, "--start"])
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"])
+    # --start # Start the simulation immediately after loading (no need to press the start button)
+    # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
     scheduler = Scheduler(env, traci_mgr)
 
     ##################################################
