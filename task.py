@@ -19,4 +19,5 @@ class Task:
         # 0 = generated / never assigned
         # 1 = assigned
         # 2 = processed
+        # 3 = deadline expired
         self.status = 0
