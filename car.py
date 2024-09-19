@@ -16,6 +16,7 @@ class Car:
         self.assigned_tasks = []
         self.processor = simpy.Resource(self.env, capacity=1)
         self.current_task = None
+        self.active_processes = []
 
         # Mobility
         self.speed = speed

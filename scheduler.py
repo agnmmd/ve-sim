@@ -89,7 +89,8 @@ class Scheduler:
                         # self.schedule[idle_car.id] = selected_task
 
                         # Spawn processes for processing the tasks
-                        self.env.process(selected_car.process_task(selected_task))
+                        process = self.env.process(selected_car.process_task(selected_task))
+                        selected_car.active_processes.append(process)
                     else:
                         print(f"Task {selected_task.id} couldn't be assigned; No resources to process it before deadline!")
                         if self.env.now >= (selected_task.time_of_arrival + selected_task.deadline):
