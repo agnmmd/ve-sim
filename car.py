@@ -47,31 +47,38 @@ class Car:
             self.generated_tasks_count += 1
 
     def process_task(self, selected_task):
-        with self.processor.request() as req:
-            yield req   # Wait to acquire the requested resource
+        try:
+            with self.processor.request() as req:
+                yield req   # Wait to acquire the requested resource
 
-            # Housekeeping
-            assert(selected_task == self.assigned_tasks[0])
-            self.current_task = self.assigned_tasks.pop(0)
-            self.current_task.processing_start = self.env.now
-            self.current_task.status = 2
-            
-            processing_time = self.calculate_processing_time(selected_task)
-            # Start processing
-            yield self.env.timeout(processing_time)
-            # Finished processing
+                # Housekeeping
+                assert(selected_task == self.assigned_tasks[0])
+                self.current_task = self.assigned_tasks.pop(0)
+                self.current_task.processing_start = self.env.now
+                self.current_task.status = 2
 
-            # Update metrics
-            self.total_processing_time += processing_time
-            self.processed_tasks_count += 1
-            if self.env.now - self.current_task.time_of_arrival <= self.current_task.deadline:
-                self.successful_tasks += 1
+                processing_time = self.calculate_processing_time(selected_task)
+                # Start processing
+                yield self.env.timeout(processing_time)
+                # Finished processing
 
-            print(f"@t={self.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
-            self.current_task.processing_end = self.env.now
-            Statistics.save_task_stats(self.current_task, self.id)
-            self.current_task = None
-        self.idle = True
+                # Update metrics
+                self.total_processing_time += processing_time
+                self.processed_tasks_count += 1
+                if self.env.now - self.current_task.time_of_arrival <= self.current_task.deadline:
+                    self.successful_tasks += 1
+
+                print(f"@t={self.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
+                self.current_task.processing_end = self.env.now
+                Statistics.save_task_stats(self.current_task, self.id)
+                self.current_task = None
+        except simpy.Interrupt:
+            print(f"Process for car {self.id} interrupted!")
+        finally:
+            self.idle = True
+            if self.env.active_process in self.active_processes:
+                self.active_processes.remove(self.env.active_process)
+
 
     def calculate_waiting_time(self):
         return sum(task.complexity / self.processing_power for task in self.assigned_tasks)
