@@ -106,7 +106,14 @@ class Car:
 
         for task in self.assigned_tasks:
             Statistics.save_task_stats(task, "NA")
+        self.assigned_tasks.clear()
 
         for task in self.generated_tasks:
             Statistics.save_task_stats(task, "NA")
+        self.generated_tasks.clear()
 
+        # Terminate the processes associated with this Car
+        for process in list(self.active_processes):  # Copy the list to avoid modifying it during iteration
+            if process.is_alive:  # Check if the process is still running
+                process.interrupt()  # Interrupt the process
+        self.active_processes.clear()  # Clear the list of processes
