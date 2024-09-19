@@ -84,10 +84,9 @@ class TraciManager:
         print("Vehicles that we care about, subscribed vehicles:", self.subscribed_vehicles.keys())
         print("")
 
-    @staticmethod
-    def in_roi(point, boxes):
+    def _is_in_roi(self, point):
         x, y = point
-        return any(min_x <= x <= max_x and min_y <= y <= max_y for min_x, min_y, max_x, max_y in boxes)
+        return any(min_x <= x <= max_x and min_y <= y <= max_y for min_x, min_y, max_x, max_y in self.rois)
 
     def set_rois(self, rois):
         self.rois = rois
