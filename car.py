@@ -22,6 +22,7 @@ class Car:
         self.position = position
 
         # Statistics
+        self.generated_tasks_count = 0
         self.successful_tasks = 0
         self.total_processing_time = 0
         self.processed_tasks_count = 0
@@ -33,6 +34,7 @@ class Car:
             task = Task(self.env, self.sim, self)
             self.generated_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")
+            self.generated_tasks_count += 1
 
     def generate_tasks_static(self, num_tasks):
         """
@@ -41,6 +43,7 @@ class Car:
         self.generated_tasks = [Task(self.env, self.sim, self) for _ in range(num_tasks)]
         for task in self.generated_tasks:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
+            self.generated_tasks_count += 1
 
     def process_task(self, selected_task):
         with self.processor.request() as req:

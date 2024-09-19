@@ -64,7 +64,7 @@ class Statistics:
     def save_car_stats(cls, car, current_time):
         data = {
             'Car ID': car.id,
-            'Generated Tasks': len(car.generated_tasks),
+            'Generated Tasks': car.generated_tasks_count,
             'Processed Tasks': car.processed_tasks_count,
             'Successful Tasks': car.successful_tasks,
             'Queued Tasks': len(car.assigned_tasks),
