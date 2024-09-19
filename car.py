@@ -8,14 +8,16 @@ class Car:
         self.env = env
         self.sim = sim
 
+        # Parameters
         self.id = "c" + str(self.sim.set_car_id())
-        self.generated_tasks = []
-        self.processing_power = 2
-        self.idle = True
+        self.processing_power = 0.5
         self.dwell_time = 10
-        self.assigned_tasks = []
         self.processor = simpy.Resource(self.env, capacity=1)
+
+        self.idle = True
         self.current_task = None
+        self.generated_tasks = []
+        self.assigned_tasks = []
         self.active_processes = []
 
         # Mobility
@@ -112,7 +114,7 @@ class Car:
             Statistics.save_task_stats(task, "NA")
         self.generated_tasks.clear()
 
-        # Terminate the processes associated with this Car
+        # Interrupt the processes associated with this Car
         for process in list(self.active_processes):  # Copy the list to avoid modifying it during iteration
             if process.is_alive:  # Check if the process is still running
                 process.interrupt()  # Interrupt the process
