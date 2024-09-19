@@ -96,8 +96,9 @@ class Car:
         """
         Statistics.save_car_stats(self, self.env.now)
 
-        for t in self.assigned_tasks:
-            Statistics.save_task_stats(t, "NA")
+        for task in self.assigned_tasks:
+            Statistics.save_task_stats(task, "NA")
 
-        for t in self.generated_tasks:
-            Statistics.save_task_stats(t, "NA")
+        for task in self.generated_tasks:
+            Statistics.save_task_stats(task, "NA")
+

@@ -66,7 +66,7 @@ class Scheduler:
     def schedule_tasks_exhaust(self, policy):
         while True:
             # Merge cars that have been added statically and cars added by TraCI
-            self.cars = self.static_cars + list(self.traci.get_subscribed_vehicles_list())
+            self.cars = self.static_cars + self.traci.get_subscribed_vehicles_list()
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
             if self.generated_tasks_exist():
