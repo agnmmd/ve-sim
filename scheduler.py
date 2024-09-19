@@ -95,7 +95,7 @@ class Scheduler:
                         if self.env.now >= (selected_task.time_of_arrival + selected_task.deadline):
                             print(f"The deadline of Task {selected_task.id} is in the past; Removing it!")
                             selected_task.status = 3
-                            Statistics.save_task_stats(t, "Scheduler")
+                            Statistics.save_task_stats(selected_task, "Scheduler")
                             selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
 
             # Print state after assignments are finished
