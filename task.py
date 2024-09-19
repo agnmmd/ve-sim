@@ -20,4 +20,5 @@ class Task:
         # 1 = assigned
         # 2 = processed
         # 3 = deadline expired
+        # 4 = interrupted
         self.status = 0

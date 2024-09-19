@@ -76,6 +76,12 @@ class Car:
                 self.current_task = None
         except simpy.Interrupt:
             print(f"Process for car {self.id} interrupted!")
+
+            # Record the statistics for the task who's process was interrupted
+            if(self.current_task):
+                self.current_task.status = 4
+                Statistics.save_task_stats(self.current_task, self.id)
+                self.current_task = None
         finally:
             self.idle = True
             if self.env.active_process in self.active_processes:
