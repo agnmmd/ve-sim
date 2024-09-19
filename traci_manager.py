@@ -7,17 +7,17 @@ class TraciManager:
     Manages the interaction between SUMO traffic simulation and SimPy environment.
     Handles vehicle subscriptions, updates, and region of interest (ROI) filtering.
     """
-
-    def __init__(self, env, sim):
+    def __init__(self, env, sim, end_time):
         self.env = env
         self.sim = sim
         self.rois = []  # List of regions of interest
         self.subscribed_vehicles = {}  # Dictionary to store subscribed vehicles
+        self.end_time = end_time  # New variable to store the simulation end time
 
     def execute_one_time_step(self):
         previous_vehicle_ids = set()
 
-        while traci.simulation.getMinExpectedNumber() > 0:
+        while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
             try:
                 traci.simulationStep()
                 yield self.env.timeout(1)
@@ -30,6 +30,15 @@ class TraciManager:
                 print(f"TraCI Exception: {e}")
                 break
 
+        # Graceful termination
+        self._handle_simulation_end()
+
+    def _handle_simulation_end(self):
+        print(f"Simulation ending at time: {self.env.now}")
+        # Perform any cleanup operations here
+        for vehicle in self.subscribed_vehicles.values():
+            vehicle.finish()
+        self.subscribed_vehicles.clear()
         traci.close()
         print("TraCI disconnected")
 

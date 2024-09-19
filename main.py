@@ -39,7 +39,7 @@ def run_sim(policy_func, run=-1, repetition=-1):
     sim = Sim()
     Sim.update_sim_variables(run=run, repetition=repetition, policy_function=policy_func)
 
-    traci_mgr = TraciManager(env, sim)
+    traci_mgr = TraciManager(env, sim, 18)
     # traci_mgr.set_rois([(-50, -10, 50, 10)])
     sumo_binary = "/usr/bin/sumo-gui"
     sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
