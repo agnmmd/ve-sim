@@ -2,8 +2,8 @@ import random
 
 class Sim:
     def __init__(self):
-        self._task_id_counter = 0
-        self._car_id_counter = 0
+        self._task_id_counter = -1
+        self._car_id_counter = -1
 
     run = -1
     reperition = -1
