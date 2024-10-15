@@ -7,6 +7,7 @@ from policy import Policy
 import traci
 import os
 import simpy
+from traci_drawer import TraciDrawer
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -89,6 +90,20 @@ def run_sim(policy_func, run=-1, repetition=-1):
     scheduler.register_static_car([car1])
     
     traci.start(sumo_cmd)
+
+    drawer = TraciDrawer()
+
+    # Add a rectangle using bottom-left and top-right coordinates
+    bottom_left = (100, 100)
+    top_right = (200, 200)
+    drawer.add_rectangle("rectangle1", bottom_left, top_right)
+
+    # Add a circle
+    drawer.add_circle("circle1", center=(150, 150), radius=30)
+
+    # Draw all shapes in the SUMO simulation
+    drawer.draw_shapes()
+
     env.process(traci_mgr.execute_one_time_step())
     ##################################################
     
