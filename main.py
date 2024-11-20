@@ -7,7 +7,7 @@ from policy import Policy
 import traci
 import os
 import simpy
-from traci_drawer import TraciDrawer
+from traci_annotation import TraciAnnotation
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -91,7 +91,7 @@ def run_sim(policy_func, run=-1, repetition=-1):
     
     traci.start(sumo_cmd)
 
-    drawer = TraciDrawer()
+    drawer = TraciAnnotation()
 
     # Add a rectangle using bottom-left and top-right coordinates
     bottom_left = (100, 100)
