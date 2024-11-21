@@ -41,11 +41,11 @@ class Car:
             print(f"Car {self.id} generated a Task: {task.__dict__}")
             self.generated_tasks_count += 1
 
-    def generate_tasks_static(self, num_tasks):
+    def generate_tasks_static(self):
         """
         Tasks generated with this method will have the same time of arrival (TOA)
         """
-        self.generated_tasks = [Task(self.env, self.sim, self) for _ in range(num_tasks)]
+        self.generated_tasks = [Task(self.env, self.sim, self) for _ in range(self.num_tasks)]
         for task in self.generated_tasks:
             print(f"Car {self.id} generated Task {task.id}: {task.__dict__}")
             self.generated_tasks_count += 1

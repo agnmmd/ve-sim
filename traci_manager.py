@@ -87,7 +87,7 @@ class TraciManager:
     def subscribe_to_vehicle(self, vehicle_id):
         traci.vehicle.subscribe(vehicle_id, [tc.VAR_POSITION, tc.VAR_SPEED])
         self.subscribed_vehicles[vehicle_id] = Car(self.env, self.sim, speed=None, position=None)
-        self.subscribed_vehicles[vehicle_id].generate_tasks_static(14)
+        self.subscribed_vehicles[vehicle_id].generate_tasks_static()
         # self.env.process(self.subscribed_vehicles[vehicle_id].generate_tasks())
 
     def remove_unsubscribed_vehicles(self, traci_vehicles):
