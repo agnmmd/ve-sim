@@ -23,4 +23,5 @@ class Task:
         # 2 = processed
         # 3 = deadline expired
         # 4 = interrupted
+        # 5 = requeue
         self.status = 0
