@@ -118,15 +118,30 @@ def run_sim(policy_func, run=-1, repetition=-1):
     for car in scheduler.static_cars:
         car.finish()
         
+
+def run():
+    policy = InputManager.scenario_args['policy']
+    run_number = InputManager.scenario_args['run']
+    repeat = InputManager.scenario_args['repetition']
+
+    run_sim(policy, run_number, repeat)
+
 if __name__ == "__main__":
-    # Executing multiple simulation for each different policy
-    run = 0
-    repeat = 1
-    for repetition in range(repeat):
-        for policy_func in Policy.get_policies():
-            print(run, repetition, policy_func)
-            run_sim(policy_func, run, repetition)
-            run += 1
+    # # Executing multiple simulation for each different policy
+    # run = 0
+    # repeat = 1
+    # for repetition in range(repeat):
+    #     # Inner loop
+    #     for policy_func in Policy.get_policies():
+    #         print(run, repetition, policy_func)
+    #         run_sim(policy_func, run, repetition)
+    #         run += 1
+
+    InputManager.parse_arguments()
+    InputManager.load_config()
+    InputManager.get_run_number()
+    InputManager.scenario_arguments()
+    run()
 
     # Executing single scenario
     # run_sim(policy_func=Policy.p_random)
