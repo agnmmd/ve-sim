@@ -12,7 +12,7 @@ class Statistics:
         ],
         'car_statistics.csv': [
             'Car ID', 'Generated Tasks', 'Processed Tasks', 'Successful Tasks',
-            'Queued Tasks', 'Total Processing Time', 'Lifetime', 'Repetition', 'Policy', 'Run'
+            'Queued Tasks', 'Processing power' ,'Total Processing Time', 'Lifetime', 'Repetition', 'Policy', 'Run'
         ]
     }
 
@@ -68,6 +68,7 @@ class Statistics:
             'Processed Tasks': car.processed_tasks_count,
             'Successful Tasks': car.successful_tasks,
             'Queued Tasks': len(car.assigned_tasks),
+            'Processing power' : car.processing_power,
             'Total Processing Time': car.total_processing_time,
             'Lifetime': current_time - car.time_of_arrival,
             'Repetition': Sim.repetition,
