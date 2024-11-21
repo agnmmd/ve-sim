@@ -2,6 +2,7 @@ from stats import Statistics
 from task import Task
 import simpy
 import random
+from input_manager import InputManager
 
 class Car:
     def __init__(self, env, sim, speed = None, position = None):
@@ -10,7 +11,8 @@ class Car:
 
         # Parameters
         self.id = "c" + str(self.sim.set_car_id())
-        self.processing_power = 0.5
+        self.processing_power = InputManager.scenario_args['car_processing_power']()
+        self.num_tasks = InputManager.scenario_args['task_generation']()
         self.dwell_time = 10
         self.processor = simpy.Resource(self.env, capacity=1)
 
