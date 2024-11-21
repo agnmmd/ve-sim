@@ -7,12 +7,13 @@ class TraciManager:
     Manages the interaction between SUMO traffic simulation and SimPy environment.
     Handles vehicle subscriptions, updates, and region of interest (ROI) filtering.
     """
-    def __init__(self, env, sim, end_time):
+    def __init__(self, env, sim, start_time, end_time):
         self.env = env
         self.sim = sim
         self.rois = []  # List of regions of interest
         self.subscribed_vehicles = {}  # Dictionary to store subscribed vehicles
         self.end_time = end_time  # New variable to store the simulation end time
+        self.start_time = start_time
 
     def execute_one_time_step(self):
         while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
@@ -21,7 +22,7 @@ class TraciManager:
                 yield self.env.timeout(1)
                 print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci.simulation.getTime()}")
 
-                if self.env.now >= 4:
+                if self.env.now >= self.start_time:
                     self.update_subscriptions()
                     self.update_vehicle_data()
 
