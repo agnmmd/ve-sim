@@ -66,6 +66,7 @@ class TraciManager:
             if vehicle_id not in self.subscribed_vehicles:
                 position = traci.vehicle.getPosition(vehicle_id)
                 if self._is_in_roi(position):
+                    print(f"Vehicle: {vehicle_id} is in ROI!")
                     self.subscribe_to_vehicle(vehicle_id)
 
         # Remove vehicles

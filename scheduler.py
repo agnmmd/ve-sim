@@ -73,6 +73,7 @@ class Scheduler:
                 for _ in range(len(self.get_generated_tasks())):
 
                     selected_task = policy(self.get_generated_tasks())
+                    # if selected_task is None : break
                     # selected_car = self.cars[0]
                     selected_car = self.select_car(selected_task)
 
