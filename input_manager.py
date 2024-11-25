@@ -234,3 +234,13 @@ class InputManager:
                 for rep in range(repeat):
                     cls.runs[( cls.run_index, simulation)] = scenario
                     cls.run_index += 1
+
+    @classmethod
+    def initilize(cls):
+        cls.parse_arguments()
+        cls.load_config()
+        cls.get_run_number()
+        cls.scenario_arguments()
+
+        # print(scenarios)
+        print(cls.runs)

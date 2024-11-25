@@ -20,14 +20,14 @@ from input_manager import InputManager
 
 #     yield Sim.env.timeout(1)
 
-def generate_cars(env, sim, scheduler):
-    while True:
-        new_car = Car(env, sim)
-        scheduler.register_static_car([new_car])
-        print(f"New Car {new_car.id} added at time {env.now}")
-        new_car.generate_tasks_static(2)
-        yield env.timeout(1)
-        # yield Sim.env.timeout(random.expovariate(lambda_rate))
+# def generate_cars(env, sim, scheduler):
+#     while True:
+#         new_car = Car(env, sim)
+#         scheduler.register_static_car([new_car])
+#         print(f"New Car {new_car.id} added at time {env.now}")
+#         new_car.generate_tasks_static(2)
+#         yield env.timeout(1)
+#         # yield Sim.env.timeout(random.expovariate(lambda_rate))
 
 def just_a_timer(env):
     """Just a timer that progresses time until the simulation ends"""
@@ -93,20 +93,21 @@ def run_sim(policy_func, run=-1, repetition=-1):
     
     traci.start(sumo_cmd)
 
-    drawer = TraciAnnotation()
+    ##################################################
+    # drawer = TraciAnnotation()
 
-    # Add a rectangle using bottom-left and top-right coordinates
-    bottom_left = (100, 100)
-    top_right = (200, 200)
-    drawer.add_rectangle("rectangle1", bottom_left, top_right)
+    # # Add a rectangle using bottom-left and top-right coordinates
+    # bottom_left = (100, 100)
+    # top_right = (200, 200)
+    # drawer.add_rectangle("rectangle1", bottom_left, top_right)
 
-    # Add a circle
-    drawer.add_circle("circle1", center=(150, 150), radius=30)
+    # # Add a circle
+    # drawer.add_circle("circle1", center=(150, 150), radius=30)
 
-    # Draw all shapes in the SUMO simulation
-    drawer.draw_shapes()
+    # # Draw all shapes in the SUMO simulation
+    # drawer.draw_shapes()
 
-    env.process(traci_mgr.execute_one_time_step())
+    # env.process(traci_mgr.execute_one_time_step())
     ##################################################
     
     # Start Scheduling
@@ -117,14 +118,6 @@ def run_sim(policy_func, run=-1, repetition=-1):
     # Print statistics for static cars that haven't been removed by dwell time
     for car in scheduler.static_cars:
         car.finish()
-        
-
-def run():
-    policy = InputManager.scenario_args['policy']
-    run_number = InputManager.scenario_args['run']
-    repeat = InputManager.scenario_args['repetition']
-
-    run_sim(policy, run_number, repeat)
 
 if __name__ == "__main__":
     # # Executing multiple simulation for each different policy
@@ -137,14 +130,15 @@ if __name__ == "__main__":
     #         run_sim(policy_func, run, repetition)
     #         run += 1
 
-    InputManager.parse_arguments()
-    InputManager.load_config()
-    InputManager.get_run_number()
-    InputManager.scenario_arguments()
-    run()
-
     # Executing single scenario
     # run_sim(policy_func=Policy.p_random)
+
+    InputManager.initilize()
+    policy = InputManager.scenario_args['policy']
+    run_number = InputManager.scenario_args['run']
+    repeat = InputManager.scenario_args['repetition']
+
+    run_sim(policy, run_number, repeat)
 
 
 # TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
