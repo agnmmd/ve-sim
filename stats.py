@@ -20,18 +20,6 @@ class Statistics:
     @staticmethod
     def _filename(stat_type):
         filename = [
-        f"_r_{InputManager.parsed_args.run}",
-        f"_p_{InputManager.parsed_args.policy}" if InputManager.parsed_args.policy else "",
-        f"_rep_{InputManager.parsed_args.repetition}" if InputManager.parsed_args.repetition else "",
-        f"_cf_{InputManager.parsed_args.configfile}" if InputManager.parsed_args.configfile else "",
-        f"_c_{InputManager.parsed_args.configurations}" if InputManager.parsed_args.configurations else "",
-        f"_tg_{InputManager.parsed_args.task_generation}" if InputManager.parsed_args.task_generation else "",
-        f"_s_{InputManager.parsed_args.start}" if InputManager.parsed_args.start else "",
-        f"_dur_{InputManager.parsed_args.duration}" if InputManager.parsed_args.duration else "",
-        f"_tc_{InputManager.parsed_args.task_complexity}" if InputManager.parsed_args.task_complexity else "",
-        f"_tp_{InputManager.parsed_args.task_priority}" if InputManager.parsed_args.task_priority else "",
-        f"_td_{InputManager.parsed_args.task_deadline}" if InputManager.parsed_args.task_deadline else "",
-        f"_cp_{InputManager.parsed_args.car_processing_power}" if InputManager.parsed_args.car_processing_power else ""
     ]
         return f"{stat_type}" + "".join(name for name in filename if name) + ".csv"
 
