@@ -8,7 +8,6 @@ import traci
 import os
 import simpy
 from traci_annotation import TraciAnnotation
-from input_manager import InputManager
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -35,21 +34,25 @@ def just_a_timer(env):
         print("Timer: ", env.now)
         yield env.timeout(1)
 
-def run_sim(policy_func, run=-1, repetition=-1):
+def run_sim():
 
     env = simpy.Environment()
     sim = Sim()
-    Sim.update_sim_variables(run=run, repetition=repetition, policy_function=policy_func)
 
-    traci_mgr = TraciManager(env, sim , InputManager.scenario_args['start'] , InputManager.scenario_args['end']) # New variable to store the simulation end time)
+    start = sim.get_im_parameter('start')
+    end = sim.get_im_parameter('end')
+    traci_mgr = TraciManager(env, sim, start, end) # New variable to store the simulation end time)
     # traci_mgr = TraciManager(env, sim, 18)
     # traci_mgr.set_rois([(-50, -10, 50, 10)])
     sumo_binary = "/usr/bin/sumo-gui"
-    sumo_cfg = os.path.join(os.path.dirname(__file__), 'SUMO', 'street.sumocfg')
-    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end"]#, "--start"])
+    sumo_cfg = os.path.join(os.path.dirname(__file__), "SUMO", "street.sumocfg")
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", "0.01"]#, "--start"])
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
+    # --step-length TIME # Defines the step duration in seconds
     scheduler = Scheduler(env, traci_mgr)
+
+    traci.start(sumo_cmd)
 
     ##################################################
     # NOTE: Scenario 1: Static car insertion
@@ -91,7 +94,6 @@ def run_sim(policy_func, run=-1, repetition=-1):
     car1 = Car(env, sim)
     scheduler.register_static_car([car1])
     
-    traci.start(sumo_cmd)
 
     ##################################################
     # drawer = TraciAnnotation()
@@ -133,12 +135,7 @@ if __name__ == "__main__":
     # Executing single scenario
     # run_sim(policy_func=Policy.p_random)
 
-    InputManager.initilize()
-    policy = InputManager.scenario_args['policy']
-    run_number = InputManager.scenario_args['run']
-    repeat = InputManager.scenario_args['repetition']
-
-    run_sim(policy, run_number, repeat)
+    run_sim()
 
 
 # TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
