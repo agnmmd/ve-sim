@@ -96,20 +96,20 @@ def run_sim():
     
 
     ##################################################
-    # drawer = TraciAnnotation()
+    drawer = TraciAnnotation()
 
-    # # Add a rectangle using bottom-left and top-right coordinates
-    # bottom_left = (100, 100)
-    # top_right = (200, 200)
-    # drawer.add_rectangle("rectangle1", bottom_left, top_right)
+    # Add a rectangle using bottom-left and top-right coordinates
+    bottom_left = (100, 100)
+    top_right = (200, 200)
+    drawer.add_rectangle('rectangle1', bottom_left, top_right)
 
-    # # Add a circle
-    # drawer.add_circle("circle1", center=(150, 150), radius=30)
+    # Add a circle
+    drawer.add_circle('circle1', center=(150, 150), radius=30)
 
-    # # Draw all shapes in the SUMO simulation
-    # drawer.draw_shapes()
+    # Draw all shapes in the SUMO simulation
+    drawer.draw_shapes()
 
-    # env.process(traci_mgr.execute_one_time_step())
+    env.process(traci_mgr.execute_one_time_step())
     ##################################################
     
     # Start Scheduling
