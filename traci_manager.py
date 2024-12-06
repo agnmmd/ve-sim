@@ -10,6 +10,7 @@ class TraciManager:
     def __init__(self, env, sim, start_time, end_time):
         self.env = env
         self.sim = sim
+
         self.rois = []  # List of regions of interest
         self.subscribed_vehicles = {}  # Dictionary to store subscribed vehicles
         self.end_time = end_time  # New variable to store the simulation end time
@@ -19,8 +20,12 @@ class TraciManager:
         while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
             try:
                 traci.simulationStep()
-                yield self.env.timeout(1)
-                print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci.simulation.getTime()}")
+                yield self.env.timeout(0.01)
+                traci_time = traci.simulation.getTime()
+                print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci_time}")
+
+                # Round the times to 6 decimals and make sure that they are in sync
+                assert round(self.env.now, 6) == round(traci_time, 6), "SimPy time and TraCI time are not the same!"
 
                 if self.env.now >= self.start_time:
                     self.update_subscriptions()
