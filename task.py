@@ -1,6 +1,5 @@
 import random
 
-from input_manager import InputManager
 class Task:
     def __init__(self, env, sim, source_car):
         self.env = env
@@ -10,9 +9,9 @@ class Task:
         self.source_car = source_car
         self.time_of_arrival = self.env.now
 
-        self.deadline = InputManager.scenario_args['task_deadline']()
-        self.priority = InputManager.scenario_args['task_priority']()
-        self.complexity = InputManager.scenario_args['task_complexity']()
+        self.deadline = self.sim.get_im_parameter('task_deadline')()
+        self.priority = self.sim.get_im_parameter('task_priority')()
+        self.complexity = self.sim.get_im_parameter('task_complexity')()
         self.processing_start = -1
         self.processing_end = -1
 

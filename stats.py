@@ -1,7 +1,6 @@
 import csv
 import os
 from sim import Sim
-from input_manager import InputManager
 
 class Statistics:
     _initialized = False
@@ -20,6 +19,9 @@ class Statistics:
     @staticmethod
     def _filename(stat_type):
         filename = [
+        f"_r_{Sim.get_parameter('run')}",
+        f"_cf_{Sim.get_parameter('configfile')}" if Sim.get_parameter('configfile') else "",
+        f"_c_{Sim.get_parameter('sim_config')}" if Sim.get_parameter('sim_config') else "",
     ]
         return f"{stat_type}" + "".join(name for name in filename if name) + ".csv"
 
@@ -61,9 +63,9 @@ class Statistics:
             'Processing Car': processing_car_id,
             'Processing Start': task.processing_start,
             'Processing End': task.processing_end,
-            'Repetition': Sim.repetition,
-            'Policy': Sim.policy_name,
-            'Run': Sim.run
+            'Repetition': Sim.get_parameter('repetition'),
+            'Policy': Sim.get_parameter('policy_name'),
+            'Run': Sim.get_parameter('run')
         }
         cls._save_stats('task', data)
 
@@ -78,8 +80,8 @@ class Statistics:
             'Processing power' : car.processing_power,
             'Total Processing Time': car.total_processing_time,
             'Lifetime': current_time - car.time_of_arrival,
-            'Repetition': Sim.repetition,
-            'Policy': Sim.policy_name,
-            'Run': Sim.run
+            'Repetition': Sim.get_parameter('repetition'),
+            'Policy': Sim.get_parameter('policy_name'),
+            'Run': Sim.get_parameter('run')
         }
         cls._save_stats('car', data)

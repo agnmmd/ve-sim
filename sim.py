@@ -1,16 +1,21 @@
 import random
+from input_manager import InputManager
 
 class Sim:
+    # Class-level initialization of scenario arguments
+    sim_parameters = InputManager.get_scenario_args()  # Call the method, don't use get_scenario_args()
+
     def __init__(self):
+        # Initialize ID counters
         self._task_id_counter = -1
         self._car_id_counter = -1
 
-    run = -1
-    reperition = -1
-    random.seed(42)
-
-    policy_name = None
-    policy_function = None
+        # Use class method to get run and repetition
+        self.run = self.get_parameter('run')
+        self.repetition = self.get_parameter('repetition')
+        
+        # Set random seed for reproducibility
+        random.seed(self.repetition)
 
     def set_task_id(self):
         self._task_id_counter += 1
@@ -21,3 +26,11 @@ class Sim:
         return self._car_id_counter
 
     @classmethod
+    def get_parameter(cls, parameter):
+        # Ensure parameters exist before accessing
+        if parameter not in cls.sim_parameters:
+            raise KeyError(f"Parameter '{parameter}' not found in simulation parameters")
+        return cls.sim_parameters[parameter]
+    
+    def get_im_parameter(self, parameter):
+        return self.get_parameter(parameter)

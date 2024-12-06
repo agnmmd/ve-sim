@@ -2,7 +2,6 @@ from stats import Statistics
 from task import Task
 import simpy
 import random
-from input_manager import InputManager
 
 class Car:
     def __init__(self, env, sim, speed = None, position = None):
@@ -10,9 +9,9 @@ class Car:
         self.sim = sim
 
         # Parameters
-        self.id = "c" + str(self.sim.set_car_id())
-        self.processing_power = InputManager.scenario_args['car_processing_power']()
-        self.num_tasks = InputManager.scenario_args['task_generation']()
+        self.id = "c" + str(sim.set_car_id())
+        self.processing_power = sim.get_im_parameter('car_processing_power')()
+        self.num_tasks = sim.get_im_parameter('task_generation')()
         self.dwell_time = 10
         self.processor = simpy.Resource(self.env, capacity=1)
 
@@ -89,7 +88,6 @@ class Car:
             if self.env.active_process in self.active_processes:
                 self.active_processes.remove(self.env.active_process)
 
-
     def calculate_waiting_time(self):
         return sum(task.complexity / self.processing_power for task in self.assigned_tasks)
 
@@ -127,3 +125,5 @@ class Car:
             if process.is_alive:  # Check if the process is still running
                 process.interrupt()  # Interrupt the process
         self.active_processes.clear()  # Clear the list of processes
+
+        # TODO: Make reporting of tasks statistics a method of Tasks class
