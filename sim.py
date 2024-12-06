@@ -21,13 +21,3 @@ class Sim:
         return self._car_id_counter
 
     @classmethod
-    def update_sim_variables(cls, run, repetition, policy_function):
-        cls.run = run
-        cls.repetition = repetition
-        random.seed(cls.repetition)
-        cls.policy_function = policy_function
-        cls.policy_name = cls.extract_method_name(policy_function)
-
-    @staticmethod
-    def extract_method_name(method):
-        return method.__name__[2:]
