@@ -42,9 +42,9 @@ class Policy:
         
     @classmethod
     def get_policies(cls):
-        """
-        Returns a dictionary of policy_name : policy_callable_function pairs
-        """
-        # Get all static methods from the Policy class
-        policies = [method for method in dir(cls) if callable(getattr(cls, method)) and method.startswith("p")]
-        return [getattr(cls, policy_name) for policy_name in policies]
+        policies = {
+            policy_name[2:]: getattr(cls, policy_name) 
+            for policy_name in dir(cls) 
+            if callable(getattr(cls, policy_name)) and policy_name.startswith("p_")
+        }
+        return policies
