@@ -50,46 +50,44 @@ class InputManager:
     } 
 
     # TODO: get rid of the class variables if not absolutely necessary. Use local variables whenever possible.
-    configfile = None
-    command_line_args = None
-    runs_dict = dict()
     scenario_args = None
 
-    @classmethod
-    def parse_command_line_arguments(cls):
+    @staticmethod
+    def parse_command_line_arguments():
         #Parse command-line arguments
         parser = argparse.ArgumentParser(description="")
         parser.add_argument("-cf", "--configfile", required = True, type=str, help="Specifies the name of the configuration file to load simulation settings. If a configuration file is not provided, all required simulation parameters must be specified as command-line arguments.")
-        parser.add_argument("-c", "--sim_config", required = True, type=str, help="Defines the name of the specific simulation or scenario configuration to run.")
-        parser.add_argument("-r", "--run", required = True, type=int, help="Specifies the unique run number for the simulation.A run number is required to execute the simulation.If a config file is provided, use --dry-run to view all available run numbers and sim_config.")
+        parser.add_argument("-c", "--sim_config", type=str, help="Defines the name of the specific simulation or scenario configuration to run.")
+        parser.add_argument("-r", "--run", type=int, help="Specifies the unique run number for the simulation.A run number is required to execute the simulation.If a config file is provided, use --dry-run to view all available run numbers and sim_config.")
         # print the parameters in terminal
         parser.add_argument("--dry-run" , action='store_true', help="Displays the parameters for the specified simulation. If a run index is not provided, all scenarios for the given config file and configuration will be shown.")
         # Store parsed arguments in the class variable
-        cls.command_line_args = parser.parse_args()
+        command_line_args = parser.parse_args()
+        return command_line_args
 
-    @classmethod
-    def parse_configfile_arguments(cls, section):
+    @staticmethod
+    def parse_configfile_arguments(config, section):
         configfile_args = {
-            'repeat': get_items(cls.configfile.get(section, 'repeat')),
-            'start': get_items(cls.configfile.get(section, 'start' )), # Use fallback only if you need a specific default value beyond what DEFAULT provides 
-            'duration': get_items(cls.configfile.get(section, 'duration' )),
-            'policy': get_items(cls.configfile.get(section, 'policy')),
-            'task_generation': get_items(cls.configfile.get(section , 'task_generation')),
-            'task_complexity': get_items(cls.configfile.get(section, 'task_complexity' )),
-            'task_priority': get_items(cls.configfile.get(section, 'task_priority')),
-            'task_deadline': get_items(cls.configfile.get(section, 'task_deadline')),
-            'car_processing_power': get_items(cls.configfile.get(section, 'car_processing_power')),
+            'repeat': get_items(config.get(section, 'repeat')),
+            'start': get_items(config.get(section, 'start' )), # Use fallback only if you need a specific default value beyond what DEFAULT provides 
+            'duration': get_items(config.get(section, 'duration' )),
+            'policy': get_items(config.get(section, 'policy')),
+            'task_generation': get_items(config.get(section , 'task_generation')),
+            'task_complexity': get_items(config.get(section, 'task_complexity' )),
+            'task_priority': get_items(config.get(section, 'task_priority')),
+            'task_deadline': get_items(config.get(section, 'task_deadline')),
+            'car_processing_power': get_items(config.get(section, 'car_processing_power')),
         }
         return configfile_args
 
     @classmethod
-    def finalize_parameters(cls):
-        run = cls.command_line_args.run
-        sim_config = cls.command_line_args.sim_config
-        run_parameters  = cls.runs_dict[(run, sim_config)]
+    def finalize_parameters(cls, command_line_args, sim_config_runs):
+        run = command_line_args.run
+        sim_config = command_line_args.sim_config
+        run_parameters  = sim_config_runs[(run, sim_config)]
         
         cls.scenario_args = {
-            'configfile': cls.command_line_args.configfile,
+            'configfile': command_line_args.configfile,
             'run': run,
             'sim_config': sim_config,
             'repeat': int(run_parameters['repeat']),
@@ -107,51 +105,51 @@ class InputManager:
         }
 
     @classmethod
-    def compile_runs_from_configfile(cls):
+    def compile_all_runs_from_configfile(cls, configfile):
         """
-        Prepare simulation runs by processing configuration file and generating scenarios.
+        Prepare simulation runs by processing configuration file and generating scenarios for all sections.
         """
         # Load configuration file
-        cls.configfile = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-        cls.configfile.read(cls.command_line_args.configfile)
+        config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+        config.read(configfile)
 
-        # Determine simulation sections to process
-        sim_config = cls.command_line_args.sim_config
+        # Reset runs dictionary
+        all_runs = dict()
 
-        # Parse configuration arguments for the current simulation
-        configfile_args = cls.parse_configfile_arguments(sim_config)
+        # Process all sections in the configuration file
+        for section in config.sections():
+            run_number = 0
 
-        # Use itertools to generate all parameter combinations
-        parameters_cross_product = list(itertools.product(*configfile_args.values()))
-        scenarios = [dict(zip(configfile_args.keys(), combination)) for combination in parameters_cross_product]
+            configfile_args = cls.parse_configfile_arguments(config, section)
 
-        # Assign run numbers based on repetitions and combination of parameters
-        repeat = int(configfile_args.get('repeat', 1)[0])
-        run_number = 0  # Reset index for each simulation section
-        
-        # Create runs for each scenario
-        for scenario in scenarios:
-            for _ in range(repeat):
-                # Store run with unique index and simulation name
-                cls.runs_dict[(run_number, sim_config)] = scenario
-                run_number += 1
+            # Use itertools to generate all parameter combinations
+            parameters_cross_product = list(itertools.product(*configfile_args.values()))
+            scenarios = [dict(zip(configfile_args.keys(), combination)) for combination in parameters_cross_product]
+
+            # Assign run numbers based on repetitions and combination of parameters
+            repeat = int(configfile_args.get('repeat')[0])
+
+            # Create runs for each scenario
+            for scenario in scenarios:
+                for _ in range(repeat):
+                    # Store run with unique index and section name
+                    all_runs[(run_number, section)] = scenario
+                    run_number += 1
+
+        return all_runs
 
     @classmethod
     def get_scenario_args(cls):
-        """
-        Initialize simulation parameters and return scenario arguments.
-        
-        Returns:
-            dict: A dictionary containing finalized scenario parameters
-        """
         # Parse command-line arguments
-        cls.parse_command_line_arguments()
+        command_line_args = cls.parse_command_line_arguments()
         
         # Compile runs from configuration file
-        cls.compile_runs_from_configfile()
+        all_runs = cls.compile_all_runs_from_configfile(command_line_args.configfile)
+
+        sim_config_runs = {(run, sim_config): dict_of_parameters for (run, sim_config), dict_of_parameters in all_runs.items() if command_line_args.sim_config == sim_config}
         
         # Finalize parameters
-        cls.finalize_parameters()
+        cls.finalize_parameters(command_line_args, sim_config_runs)
         
         # Return the scenario arguments
         return cls.scenario_args
