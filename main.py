@@ -28,11 +28,11 @@ from traci_annotation import TraciAnnotation
 #         yield env.timeout(1)
 #         # yield Sim.env.timeout(random.expovariate(lambda_rate))
 
-def just_a_timer(env):
+def sim_clock(env, time_interval):
     """Just a timer that progresses time until the simulation ends"""
     while True:
-        print("Timer: ", env.now)
-        yield env.timeout(1)
+        print("SimPy time: ", env.now)
+        yield env.timeout(time_interval)
 
 def run_sim():
 
@@ -52,7 +52,11 @@ def run_sim():
     # --step-length TIME # Defines the step duration in seconds
     scheduler = Scheduler(env, traci_mgr)
 
-    traci.start(sumo_cmd)
+    # traci.start(sumo_cmd)
+
+    if not traci.isLoaded():
+        env.process(sim_clock(env, 0.1))
+
 
     ##################################################
     # NOTE: Scenario 1: Static car insertion
@@ -89,11 +93,9 @@ def run_sim():
     
     ##################################################
     # NOTE: Scenario 4: Static cars and TraCI cars
-    env.process(just_a_timer(env))
 
     car1 = Car(env, sim)
     scheduler.register_static_car([car1])
-    
 
     ##################################################
     drawer = TraciAnnotation()
@@ -140,7 +142,6 @@ if __name__ == "__main__":
 
 # TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
 # TODO: Optional: Use the schedule as a log for the schedule mapping (car, time) to task.
-
 # NOTE: Due to the order of the iteration there is an order of tasks. Car 0 might be favored.
 # NOTE: A task should be at one entity, there should not be multiple copies of a task; 
 # NOTE: Initiation of the tasks currently is happening in the Traci; Alternative: move to __init__ of Car?
