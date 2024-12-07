@@ -6,6 +6,9 @@ class TraciAnnotation:
         # Initialize the TraCI connection with SUMO
         self.shapes = []  # To store the shapes (rectangles and circles)
 
+        if not traci.isLoaded():
+            raise ValueError('TraCI is not loaded!')
+
     def add_rectangle(self, rect_id, bottom_left, top_right, color=(255, 0, 0, 255), layer=0, fill=False, lineWidth=1.0):
         """Add a rectangle using the bottom-left and top-right coordinates."""
         # Calculate the other two points (top-left and bottom-right)
