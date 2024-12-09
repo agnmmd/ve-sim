@@ -20,7 +20,7 @@ class TraciManager:
         while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
             try:
                 traci.simulationStep()
-                yield self.env.timeout(0.01)
+                yield self.env.timeout(0.1)
                 traci_time = traci.simulation.getTime()
                 print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci_time}")
 
