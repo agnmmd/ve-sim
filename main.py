@@ -52,7 +52,8 @@ def run_sim():
     # --step-length TIME # Defines the step duration in seconds
     scheduler = Scheduler(env, traci_mgr)
 
-    # traci.start(sumo_cmd)
+    traci.start(sumo_cmd)
+    env.process(traci_mgr.execute_one_time_step())
 
     if not traci.isLoaded():
         env.process(sim_clock(env, 0.1))
@@ -111,7 +112,6 @@ def run_sim():
     # Draw all shapes in the SUMO simulation
     drawer.draw_shapes()
 
-    env.process(traci_mgr.execute_one_time_step())
     ##################################################
     
     # Start Scheduling
