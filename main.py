@@ -46,7 +46,7 @@ def run_sim():
     # traci_mgr.set_rois([(-50, -10, 50, 10)])
     sumo_binary = "/usr/bin/sumo-gui"
     sumo_cfg = os.path.join(os.path.dirname(__file__), "SUMO", "street.sumocfg")
-    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", "0.01"]#, "--start"])
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", "0.1"]#, "--start"])
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
     # --step-length TIME # Defines the step duration in seconds
