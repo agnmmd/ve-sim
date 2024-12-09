@@ -41,7 +41,6 @@ def get_items(items):
     return [items]
 
 class InputManager:
-
     distribution_map = {
         "exponential": np.random.exponential,
         "normal": random.normalvariate,
@@ -60,7 +59,7 @@ class InputManager:
         parser.add_argument("-c", "--sim_config", type=str, help="Defines the name of the specific simulation or scenario configuration to run.")
         parser.add_argument("-r", "--run", type=int, help="Specifies the unique run number for the simulation.A run number is required to execute the simulation.If a config file is provided, use --dry-run to view all available run numbers and sim_config.")
         # print the parameters in terminal
-        parser.add_argument("--dry-run" , action='store_true', help="Displays the parameters for the specified simulation. If a run index is not provided, all scenarios for the given config file and configuration will be shown.")
+        parser.add_argument("--dry-run", action='store_true', help="Displays the parameters for the specified simulation. If a run index is not provided, all scenarios for the given config file and configuration will be shown.")
         # Store parsed arguments in the class variable
         command_line_args = parser.parse_args()
         return command_line_args

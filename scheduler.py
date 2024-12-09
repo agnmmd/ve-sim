@@ -99,7 +99,7 @@ class Scheduler:
                             selected_task.status = 3
                             Statistics.save_task_stats(selected_task, "NA")
                             selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
-                        else :
+                        else:
                             selected_task.status = 5
 
             # Print state after assignments are finished
