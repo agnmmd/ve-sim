@@ -22,5 +22,5 @@ class Task:
         # 2 = processed
         # 3 = deadline expired
         # 4 = interrupted
-        # 5 = requeue
+        # 5 = unassignable (i.e., no resource that can process it before deadline)
         self.status = 0
