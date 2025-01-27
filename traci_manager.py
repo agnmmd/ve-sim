@@ -60,8 +60,6 @@ class TraciManager:
     def update_subscriptions(self):
         traci_vehicles = set(traci.vehicle.getIDList())
 
-        # self.remove_unsubscribed_vehicles(traci_vehicles)
-
         if self.rois:
             self.update_subscriptions_with_roi(traci_vehicles)
         else:
@@ -96,20 +94,6 @@ class TraciManager:
         self.subscribed_vehicles[vehicle_id] = Car(self.env, self.sim, speed=None, position=None)
         self.subscribed_vehicles[vehicle_id].generate_tasks_static()
         # self.env.process(self.subscribed_vehicles[vehicle_id].generate_tasks())
-
-    def remove_unsubscribed_vehicles(self, traci_vehicles):
-    #     vehicles_to_remove = set(self.subscribed_vehicles.keys()) - traci_vehicles
-    #     print("\tVehicles_to_remove:", vehicles_to_remove)
-    #     for vehicle_id in vehicles_to_remove:
-    #         self._handle_left_vehicles(vehicle_id, traci_vehicles)
-
-    #     if self.rois:
-    #         for vehicle_id in list(self.subscribed_vehicles.keys()):
-    #             position = traci.vehicle.getPosition(vehicle_id)
-    #             if not self._is_in_roi(position):
-    #                 print("\tVehilce left ROI:", vehicle_id)
-    #                 self._handle_left_vehicles(vehicle_id, traci_vehicles)
-        pass
 
     def update_vehicle_data(self):
         for vehicle_id in self.subscribed_vehicles:
