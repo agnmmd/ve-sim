@@ -109,7 +109,7 @@ class InputManager:
         Prepare simulation runs by processing configuration file and generating scenarios for all sections.
         """
         # Load configuration file
-        config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
+        config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation(), inline_comment_prefixes=('#',';'))
         config.read(configfile)
 
         # Reset runs dictionary
