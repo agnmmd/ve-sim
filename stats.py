@@ -6,13 +6,14 @@ class Statistics:
     _initialized = False
     _files = {
         'task' :  [
+            'Run', 'Repetition', 'Config',
             'Task ID', 'Source Car ID', 'Time of Arrival', 'Deadline', 'Priority',
-            'Complexity', 'Status', 'Processing Car', 'Processing Start', 'Processing End',
-            'Repetition', 'Policy', 'Run'
+            'Complexity', 'Status', 'Processing Car', 'Processing Start', 'Processing End', 'Policy'
         ],
         'car' : [
+            'Run', 'Repetition', 'Config',
             'Car ID', 'Generated Tasks', 'Processed Tasks', 'Successful Tasks',
-            'Queued Tasks', 'Processing power' ,'Total Processing Time', 'Lifetime', 'Repetition', 'Policy', 'Run'
+            'Queued Tasks', 'Processing power' ,'Total Processing Time', 'Lifetime', 'Policy'
         ]
     }
 
@@ -65,7 +66,8 @@ class Statistics:
             'Processing End': task.processing_end,
             'Repetition': Sim.get_parameter('repetition'),
             'Policy': Sim.get_parameter('policy_name'),
-            'Run': Sim.get_parameter('run')
+            'Run': Sim.get_parameter('run'),
+            'Config': Sim.get_parameter('sim_config')
         }
         cls._save_stats('task', data)
 
@@ -82,6 +84,7 @@ class Statistics:
             'Lifetime': current_time - car.time_of_arrival,
             'Repetition': Sim.get_parameter('repetition'),
             'Policy': Sim.get_parameter('policy_name'),
-            'Run': Sim.get_parameter('run')
+            'Run': Sim.get_parameter('run'),
+            'Config': Sim.get_parameter('sim_config')
         }
         cls._save_stats('car', data)
