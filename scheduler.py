@@ -34,33 +34,43 @@ class Scheduler:
 
     def schedule_tasks(self, policy):
         while True:
-            self.cars = self.static_cars + list(self.traci.get_subscribed_vehicles_list())
+            self.cars = self.static_cars + self.traci.get_subscribed_vehicles_list()
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
             self.print_schedule("Current State")
+
+            # If we don't do the filetering the scheduler will keep assigning the tasks
+            # Filter out the tasks whose deadline has expired
+            for task in self.get_generated_tasks():
+                if self.env.now >= (task.time_of_arrival + task.deadline):
+                        print(f"The deadline of Task {task.id} is in the past; Removing it!")
+                        task.status = 3
+                        Statistics.save_task_stats(task, "NA")
+                        task.source_car.generated_tasks.remove(task) # Remove task from the list of generated tasks
+
+            # TODO: Do something about tasks whose deadline has not passed, but currently there is no resource that can save them (until one appears)
+
             if self.generated_tasks_exist() and self.idle_cars_exist():
-                for idle_car in self.get_idle_cars():
-                    # Check if idle tasks exist. If not, break
-                    if not self.generated_tasks_exist(): break
+                for _ in self.get_idle_cars():
 
                     selected_task = policy(self.get_generated_tasks())
-                    print(f"Car {idle_car.id} <-- Task {selected_task.id}")
+                    selected_car = random.choice(self.get_idle_cars())
+
+                    print(f"Car {selected_car.id} <-- Task {selected_task.id}")
 
                     # Housekeeping
-                    idle_car.assigned_tasks.append(selected_task)
-                    selected_task.source_car.generated_tasks.remove(selected_task)
-                    idle_car.idle = False
+                    selected_car.assigned_tasks.append(selected_task) # Assign task to the selected car
+                    selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
+                    selected_task.status = 1
+                    selected_car.idle = False
 
-                    # Add to schedule
-                    self.schedule[idle_car.id] = selected_task
-
-                    # Processing the task
-                    self.env.process(idle_car.process_task(selected_task))
+                    # Spawn processes for processing the tasks
+                    process = self.env.process(selected_car.process_task(selected_task))
+                    selected_car.active_processes.append(process)
 
             # Print state after assignments are finished
             print_color("----------------------------------------------------","95")
             self.print_schedule("After Scheduling")
-            # print_color(f"\n================== [End] time: {self.env.now} ==================","93")
-            offset = 0.0001 * random.random()
+            offset = 0.00001 * random.random()
             yield self.env.timeout(1 + offset)  # Check for tasks every unit of time
 
     def schedule_tasks_exhaust(self, policy):
