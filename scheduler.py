@@ -51,6 +51,8 @@ class Scheduler:
 
             if self.generated_tasks_exist() and self.idle_cars_exist():
                 for _ in self.get_idle_cars():
+                    # If all tasks have been exhausted, break (i.e., do not iterate if there are more cars than tasks)
+                    if not self.generated_tasks_exist(): break
 
                     selected_task = policy(self.get_generated_tasks())
                     selected_car = random.choice(self.get_idle_cars())
