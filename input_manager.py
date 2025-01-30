@@ -76,6 +76,10 @@ class InputManager:
             'task_priority': get_items(config.get(section, 'task_priority')),
             'task_deadline': get_items(config.get(section, 'task_deadline')),
             'car_processing_power': get_items(config.get(section, 'car_processing_power')),
+            'sumo_binary': get_items(config.get(section, 'sumo_binary')),
+            'sumo_cfg': get_items(config.get(section, 'sumo_cfg')),
+            'sumo_step_length': get_items(config.get(section, 'sumo_step_length')),
+            'traci_step_length': get_items(config.get(section, 'traci_step_length'))
         }
         return configfile_args
 
@@ -101,6 +105,10 @@ class InputManager:
             'task_priority': lambda: cls.range_int(run_parameters['task_priority']),
             'task_deadline': lambda: cls.range_int(run_parameters['task_deadline']),
             'car_processing_power': lambda: cls.range_int(run_parameters['car_processing_power']),
+            'sumo_binary': str(run_parameters['sumo_binary']),
+            'sumo_cfg': str(run_parameters['sumo_cfg']),
+            'sumo_step_length': str(run_parameters['sumo_step_length']),
+            'traci_step_length': float(run_parameters['traci_step_length'])
         }
 
     @classmethod

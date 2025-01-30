@@ -15,12 +15,13 @@ class TraciManager:
         self.subscribed_vehicles = {}  # Dictionary to store subscribed vehicles
         self.end_time = end_time  # New variable to store the simulation end time
         self.start_time = start_time
+        self.traci_step_length = self.sim.get_im_parameter('traci_step_length')
 
     def execute_one_time_step(self):
         while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
             try:
                 traci.simulationStep()
-                yield self.env.timeout(0.1)
+                yield self.env.timeout(self.traci_step_length)
                 traci_time = traci.simulation.getTime()
                 print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci_time}")
 
