@@ -116,7 +116,7 @@ def run_sim():
     
     # Start Scheduling
     policy = Policy.get_policies()[Sim.get_parameter('policy_name')]
-    env.process(scheduler.schedule_tasks_exhaust(policy))
+    env.process(scheduler.schedule_tasks(policy))
 
     env.run(until=30)
 
