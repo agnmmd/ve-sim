@@ -9,22 +9,6 @@ class Policy:
             return None
 
     @staticmethod
-    def p_shortest_deadline(tasks):
-        if tasks:
-            # Select the task with the shortest deadline
-            return min(tasks, key=lambda task: task.deadline)
-        else:
-            return None
-
-    @staticmethod
-    def p_highest_priority(tasks):
-        if tasks:
-            # Select the task with the highest priority
-            return min(tasks, key=lambda task: task.priority)
-        else:
-            return None
-        
-    @staticmethod
     def p_earliest_deadline(tasks):
         if tasks:
             # Select the task with the soonest deadline
@@ -40,6 +24,22 @@ class Policy:
         else:
             return None
         
+    # @staticmethod
+    # def p_shortest_deadline(tasks):
+    #     if tasks:
+    #         # Select the task with the shortest deadline
+    #         return min(tasks, key=lambda task: task.deadline)
+    #     else:
+    #         return None
+
+    # @staticmethod
+    # def p_highest_priority(tasks):
+    #     if tasks:
+    #         # Select the task with the highest priority
+    #         return min(tasks, key=lambda task: task.priority)
+    #     else:
+    #         return None
+
     @classmethod
     def get_policies(cls):
         policies = {
