@@ -10,18 +10,11 @@ class Scheduler:
         self.schedule = dict()
         self.static_cars = []
 
-    @classmethod
-    def remove_from_schedule(cls, car_id):
-        del cls.schedule[car_id]
-
     def generated_tasks_exist(self):
         return any(car.generated_tasks for car in self.cars)
 
     def get_generated_tasks(self):
         return [task for car in self.cars for task in car.generated_tasks]
-    
-    def assigned_tasks_exist(self):
-        return any(task for car in self.cars for task in car.assigned_tasks)
     
     def get_assigned_tasks(self):
         return [task for car in self.cars for task in car.assigned_tasks]
