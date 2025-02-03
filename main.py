@@ -47,6 +47,7 @@ def run_sim():
     sumo_binary = sim.get_im_parameter('sumo_binary')
     sumo_cfg = sim.get_im_parameter('sumo_cfg')
     sumo_step_length = sim.get_im_parameter('sumo_step_length')
+
     sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", sumo_step_length]#, "--start"])
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
@@ -97,6 +98,7 @@ def run_sim():
     # NOTE: Scenario 4: Static cars and TraCI cars
 
     car1 = Car(env, sim)
+    car1.generate_tasks_static()
     scheduler.register_static_car([car1])
 
     ##################################################

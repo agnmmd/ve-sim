@@ -103,7 +103,7 @@ class TraciManager:
                 position = results[tc.VAR_POSITION]
                 speed = results[tc.VAR_SPEED]
                 self.subscribed_vehicles[vehicle_id].update(speed=speed, position=position)
-                print(f"Vehicle: {vehicle_id}, Position: {position}, Speed: {speed}")
+                # print(f"Vehicle: {vehicle_id}, Position: {position}, Speed: {speed}")
 
     def _handle_left_vehicles(self, vehicle_id, traci_vehicles):
         if vehicle_id in traci_vehicles:

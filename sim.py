@@ -3,7 +3,7 @@ from input_manager import InputManager
 
 class Sim:
     # Class-level initialization of scenario arguments
-    sim_parameters = InputManager.get_scenario_args()  # Call the method, don't use get_scenario_args()
+    sim_parameters = InputManager.get_scenario_args()
 
     def __init__(self):
         # Initialize ID counters
