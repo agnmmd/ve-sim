@@ -8,5 +8,6 @@
     <route id="r_0" edges="E0 E1"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
     <trip id="c1" depart="0.00" color="red" from="E0" to="E1"/>
-    <trip id="c2" depart="0.00" color="cyan" from="-E1" to="-E0"/>
+    <!-- <trip id="c2" depart="0.00" color="cyan" from="-E1" to="-E0"/> -->
+    <!-- <trip id="c3" depart="5.00" color="blue" from="-E1" to="-E0"/> -->
 </routes>
