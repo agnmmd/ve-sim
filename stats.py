@@ -68,6 +68,7 @@ class Statistics:
             'Policy': Sim.get_parameter('policy_name'),
             'Run': Sim.get_parameter('run'),
             'Config': Sim.get_parameter('sim_config')
+            'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
         }
         cls._save_stats('task', data)
 
@@ -86,5 +87,6 @@ class Statistics:
             'Policy': Sim.get_parameter('policy_name'),
             'Run': Sim.get_parameter('run'),
             'Config': Sim.get_parameter('sim_config')
+            'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
         }
         cls._save_stats('car', data)

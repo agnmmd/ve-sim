@@ -12,6 +12,7 @@ class Car:
         self.id = "c" + str(sim.set_car_id())
         self.processing_power = sim.get_im_parameter('car_processing_power')()
         self.num_tasks = sim.get_im_parameter('task_generation')()
+        self.lambda_exp = sim.get_im_parameter('lambda_exp')()
         self.dwell_time = 10
         self.processor = simpy.Resource(self.env, capacity=1)
 
@@ -34,7 +35,7 @@ class Car:
 
     def generate_tasks(self):
         while True:
-            yield self.env.timeout(random.expovariate(1.0/5))
+            yield self.env.timeout(random.expovariate(self.lambda_exp))
             task = Task(self.env, self.sim, self)
             self.generated_tasks.append(task)
             print(f"Car {self.id} generated a Task: {task.__dict__}")

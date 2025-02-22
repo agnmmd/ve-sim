@@ -79,7 +79,8 @@ class InputManager:
             'sumo_binary': get_items(config.get(section, 'sumo_binary')),
             'sumo_cfg': get_items(config.get(section, 'sumo_cfg')),
             'sumo_step_length': get_items(config.get(section, 'sumo_step_length')),
-            'traci_step_length': get_items(config.get(section, 'traci_step_length'))
+            'traci_step_length': get_items(config.get(section, 'traci_step_length')),
+            'lambda_exp': get_items(config.get(section, 'lambda_exp'))
         }
         return configfile_args
 
@@ -108,7 +109,8 @@ class InputManager:
             'sumo_binary': str(run_parameters['sumo_binary']),
             'sumo_cfg': str(run_parameters['sumo_cfg']),
             'sumo_step_length': str(run_parameters['sumo_step_length']),
-            'traci_step_length': float(run_parameters['traci_step_length'])
+            'traci_step_length': float(run_parameters['traci_step_length']),
+            'lambda_exp': lambda: cls.range_int(run_parameters['lambda_exp'])
         }
 
     @classmethod
