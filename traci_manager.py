@@ -59,15 +59,13 @@ class TraciManager:
         return list(self.subscribed_vehicles.values())
 
     def update_subscriptions(self):
-        traci_vehicles = set(traci.vehicle.getIDList())
-
         if self.rois:
-            self.update_subscriptions_with_roi(traci_vehicles)
+            self.update_subscriptions_with_roi()
         else:
-            self.update_subscriptions_without_roi(traci_vehicles)
+            self.update_subscriptions_without_roi()
 
-    def update_subscriptions_with_roi(self, traci_vehicles):
-        for vehicle_id in traci_vehicles:
+    def update_subscriptions_with_roi(self):
+        for vehicle_id in set(traci.vehicle.getIDList()):
             if vehicle_id not in self.subscribed_vehicles:
                 position = traci.vehicle.getPosition(vehicle_id)
                 if self._is_in_roi(position):
@@ -78,17 +76,17 @@ class TraciManager:
         for vehicle_id in list(self.subscribed_vehicles.keys()):
             position = traci.vehicle.getPosition(vehicle_id)
             if not self._is_in_roi(position):
-                self._handle_left_vehicles(vehicle_id, traci_vehicles)
+                self._handle_left_vehicles(vehicle_id)
 
-    def update_subscriptions_without_roi(self, traci_vehicles):
-        for vehicle_id in traci_vehicles:
+    def update_subscriptions_without_roi(self):
+        for vehicle_id in set(traci.vehicle.getIDList()):
             if vehicle_id not in self.subscribed_vehicles:
                 self.subscribe_to_vehicle(vehicle_id)
 
         # Remove vehicles
-        vehicles_to_remove = set(self.subscribed_vehicles.keys()) - traci_vehicles
+        vehicles_to_remove = set(self.subscribed_vehicles.keys()) - set(traci.vehicle.getIDList())
         for vehicle_id in vehicles_to_remove:
-            self._handle_left_vehicles(vehicle_id, traci_vehicles)
+            self._handle_left_vehicles(vehicle_id)
 
     def subscribe_to_vehicle(self, vehicle_id):
         traci.vehicle.subscribe(vehicle_id, [tc.VAR_POSITION, tc.VAR_SPEED])
@@ -105,8 +103,8 @@ class TraciManager:
                 self.subscribed_vehicles[vehicle_id].update(speed=speed, position=position)
                 # print(f"Vehicle: {vehicle_id}, Position: {position}, Speed: {speed}")
 
-    def _handle_left_vehicles(self, vehicle_id, traci_vehicles):
-        if vehicle_id in traci_vehicles:
+    def _handle_left_vehicles(self, vehicle_id):
+        if vehicle_id in set(traci.vehicle.getIDList()):
             traci.vehicle.unsubscribe(vehicle_id)
         self.subscribed_vehicles[vehicle_id].finish()
         del self.subscribed_vehicles[vehicle_id]
