@@ -34,7 +34,8 @@ class TraciManager:
 
             except traci.exceptions.TraCIException as e:
                 print(f"TraCI Exception: {e}")
-                break
+                # https://github.com/eclipse-sumo/sumo/issues/13730
+                # break
 
         # Graceful termination
         self._handle_simulation_end()
