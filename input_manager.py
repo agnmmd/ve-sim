@@ -26,18 +26,19 @@ def has_matching_parentheses(s):
     return len(stack) == 0
 
 def get_items(items):
-    if items is None : 
-        return 
+    if items is None:
+        return
     if items.startswith("(") and "," in items and not items.endswith(")"):
         raise ValueError("Input starts with '(' and contains ',' but does not end with ')'.")
-    if  has_matching_parentheses(items) is False:
+    if has_matching_parentheses(items) is False:
         raise ValueError("Input has wrong number of ( ).")
     if items.startswith("(") and items.endswith(")"):
         content = items[1:-1]
-        matches = re.findall(r"(\w+\(.*?\)|\d+)", content)
+        matches = re.findall(r"(\w+\(.*?\)|\d+\.\d+|\d+)", content)
         if matches:
             return matches
-        else : return [item.strip() for item in content.split(",")]
+        else:
+            return [item.strip() for item in content.split(",")]
     return [items]
 
 class InputManager:
@@ -186,7 +187,7 @@ class InputManager:
             else:
                 return distribution(int(values))
         else:
-            return int(string)
+            return float(string)
 
     @classmethod
     def show_parameter(cls):
@@ -195,4 +196,4 @@ class InputManager:
          else : 
             for (run_index,simulation), run_parameters in cls.runs.items():
                 if simulation == cls.command_line_args.sim_config: 
-                    print(f"\nThe parameters for run index ({run_index}) and simulation ({simulation}) are: \n\n{run_parameters}\n")
+                    print(f"\nThe parameters for run index ({run_index}) and simulation ({simulation}) are: \n\n{run_parameters}\n")            return float(string)            return float(string)            return float(string)            return float(string)
