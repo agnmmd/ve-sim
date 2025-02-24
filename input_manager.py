@@ -60,7 +60,7 @@ class InputManager:
         parser.add_argument("-c", "--sim_config", type=str, help="Defines the name of the specific simulation or scenario configuration to run.")
         parser.add_argument("-r", "--run", type=int, help="Specifies the unique run number for the simulation.A run number is required to execute the simulation.If a config file is provided, use --dry-run to view all available run numbers and sim_config.")
         # print the parameters in terminal
-        parser.add_argument("--dry-run", action='store_true', help="Displays the parameters for the specified simulation. If a run index is not provided, all scenarios for the given config file and configuration will be shown.")
+        # parser.add_argument("--dry-run", action='store_true', help="Displays the parameters for the specified simulation. If a run index is not provided, all scenarios for the given config file and configuration will be shown.")
         # Store parsed arguments in the class variable
         command_line_args = parser.parse_args()
         return command_line_args
@@ -189,11 +189,12 @@ class InputManager:
         else:
             return float(string)
 
-    @classmethod
-    def show_parameter(cls):
-         if cls.command_line_args.run is not None :
-             print(f"\nThe parameters for run index ({cls.command_line_args.run}) and  simulation ({cls.command_line_args.sim_config}) are: \n\n{cls.runs[(cls.command_line_args.run , cls.command_line_args.sim_config)]}\n")
-         else : 
-            for (run_index,simulation), run_parameters in cls.runs.items():
-                if simulation == cls.command_line_args.sim_config: 
-                    print(f"\nThe parameters for run index ({run_index}) and simulation ({simulation}) are: \n\n{run_parameters}\n")            return float(string)            return float(string)            return float(string)            return float(string)
+    # FIXME: Currently the '--dry-run' option is disabled. Enable it in the ArgumentParser and make it work in this form: 'python3 main.py -cf config_file.ini --dry-run'
+    # @classmethod
+    # def show_parameter(cls, command_line_args, run_parameters):
+    #     if command_line_args.run is not None:
+    #          print(f"\nThe parameters for run index ({command_line_args.run}) and  simulation ({command_line_args.sim_config}) are: \n\n{run_parameters[(command_line_args.run , command_line_args.sim_config)]}\n")
+    #     else:
+    #         for (run_index,simulation), run_parameters in run_parameters.items():
+    #             if simulation == command_line_args.sim_config: 
+    #                 print(f"\nThe parameters for run index ({run_index}) and simulation ({simulation}) are: \n\n{run_parameters}\n")
