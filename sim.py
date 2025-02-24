@@ -1,5 +1,6 @@
 import random
 from input_manager import InputManager
+import numpy as np
 
 class Sim:
     # Class-level initialization of scenario arguments
@@ -15,6 +16,7 @@ class Sim:
         self.repetition = self.get_parameter('repetition')
         
         # Set random seed for reproducibility
+        np.random.seed(self.repetition)
         random.seed(self.repetition)
 
     def set_task_id(self):

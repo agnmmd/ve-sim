@@ -1,10 +1,11 @@
 import random
+import numpy as np
 
 class Policy:
     @staticmethod
     def p_random(tasks):
         if tasks:
-            return random.choice(tasks)
+            return np.random.choice(tasks)
         else:
             return None
 
