@@ -6,14 +6,14 @@ class Statistics:
     _initialized = False
     _files = {
         'task' :  [
-            'Run', 'Repetition', 'Config',
-            'Task ID', 'Source Car ID', 'Time of Arrival', 'Deadline', 'Priority',
-            'Complexity', 'Status', 'Processing Car', 'Processing Start', 'Processing End', 'Policy'
+            'run', 'repetition', 'config', 
+            'task_id', 'source_car_id', 'time_of_arrival', 'deadline', 'priority', 
+            'complexity', 'status', 'processing_car', 'processing_start', 'processing_end', 'policy', 'lambda_exp'
         ],
         'car' : [
-            'Run', 'Repetition', 'Config',
-            'Car ID', 'Generated Tasks', 'Processed Tasks', 'Successful Tasks',
-            'Queued Tasks', 'Processing power' ,'Total Processing Time', 'Lifetime', 'Policy'
+            'run', 'repetition', 'config', 
+            'car_id', 'generated_tasks', 'processed_tasks', 'successful_tasks', 'queued_tasks', 'processing_power', 
+            'total_processing_time', 'arrival', 'departure', 'lifetime', 'policy', 'lambda_exp'
         ]
     }
 
@@ -54,20 +54,20 @@ class Statistics:
     @classmethod
     def save_task_stats(cls, task, processing_car_id):
         data = {
-            'Task ID': task.id,
-            'Source Car ID': task.source_car.id,
-            'Time of Arrival': task.time_of_arrival,
-            'Deadline': task.deadline,
-            'Priority': task.priority,
-            'Complexity': task.complexity,
-            'Status': task.status,
-            'Processing Car': processing_car_id,
-            'Processing Start': task.processing_start,
-            'Processing End': task.processing_end,
-            'Repetition': Sim.get_parameter('repetition'),
-            'Policy': Sim.get_parameter('policy_name'),
-            'Run': Sim.get_parameter('run'),
-            'Config': Sim.get_parameter('sim_config')
+            'task_id': task.id,
+            'source_car_id': task.source_car.id,
+            'time_of_arrival': task.time_of_arrival,
+            'deadline': task.deadline,
+            'priority': task.priority,
+            'complexity': task.complexity,
+            'status': task.status,
+            'processing_car': processing_car_id,
+            'processing_start': task.processing_start,
+            'processing_end': task.processing_end,
+            'repetition': Sim.get_parameter('repetition'),
+            'policy': Sim.get_parameter('policy_name'),
+            'run': Sim.get_parameter('run'),
+            'config': Sim.get_parameter('sim_config'),
             'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
         }
         cls._save_stats('task', data)
@@ -75,18 +75,20 @@ class Statistics:
     @classmethod
     def save_car_stats(cls, car, current_time):
         data = {
-            'Car ID': car.id,
-            'Generated Tasks': car.generated_tasks_count,
-            'Processed Tasks': car.processed_tasks_count,
-            'Successful Tasks': car.successful_tasks,
-            'Queued Tasks': len(car.assigned_tasks),
-            'Processing power' : car.processing_power,
-            'Total Processing Time': car.total_processing_time,
-            'Lifetime': current_time - car.time_of_arrival,
-            'Repetition': Sim.get_parameter('repetition'),
-            'Policy': Sim.get_parameter('policy_name'),
-            'Run': Sim.get_parameter('run'),
-            'Config': Sim.get_parameter('sim_config')
+            'car_id': car.id,
+            'generated_tasks': car.generated_tasks_count,
+            'processed_tasks': car.processed_tasks_count,
+            'successful_tasks': car.successful_tasks,
+            'queued_tasks': len(car.assigned_tasks),
+            'processing_power': car.processing_power,
+            'total_processing_time': car.total_processing_time,
+            'arrival': car.time_of_arrival,
+            'departure': current_time,
+            'lifetime': current_time - car.time_of_arrival,
+            'repetition': Sim.get_parameter('repetition'),
+            'policy': Sim.get_parameter('policy_name'),
+            'run': Sim.get_parameter('run'),
+            'config': Sim.get_parameter('sim_config'),
             'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
         }
         cls._save_stats('car', data)
