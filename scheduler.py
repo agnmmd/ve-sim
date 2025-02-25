@@ -128,7 +128,7 @@ class Scheduler:
             self.static_cars.remove(car)
             print(f"Car {car.id} removed from the system at time {self.env.now}")
 
-    def remove_after_dwell_time(self, car):
+    def remove_static_car_after_dwell_time(self, car):
         yield self.env.timeout(car.dwell_time)
         self.unregister_static_car(car)
         car.finish()

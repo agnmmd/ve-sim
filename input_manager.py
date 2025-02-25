@@ -1,6 +1,5 @@
 import argparse
 import configparser
-import random
 from policy import Policy
 import random
 import numpy as np
@@ -40,6 +39,7 @@ def get_items(items):
         else:
             return [item.strip() for item in content.split(",")]
     return [items]
+
 
 class InputManager:
     distribution_map = {
