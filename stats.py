@@ -28,7 +28,8 @@ class Statistics:
 
     @classmethod
     def _initialize_files(cls):
-        directory = 'results'
+        # FIXME: The 'results/...' directory path is hardcoded here. We need a smarter handling of this -- Probably from the config file
+        directory = 'results' + '/' + Sim.get_parameter('sim_config')
         os.makedirs(directory, exist_ok=True)
         for stat_type, fieldnames in cls._files.items():
             filepath = os.path.join(directory, Statistics._filename(stat_type))
@@ -45,7 +46,8 @@ class Statistics:
     @classmethod
     def _save_stats(cls, stat_type, data):
         cls._check_initialization()
-        filepath = os.path.join('results', Statistics._filename(stat_type))
+        # FIXME: The 'results/...' directory path is hardcoded here. We need a smarter handling of this -- Probably from the config file
+        filepath = os.path.join('results' + '/' + Sim.get_parameter('sim_config'), Statistics._filename(stat_type))
         fieldnames = cls._files[stat_type]
         with open(filepath, 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter="\t")
