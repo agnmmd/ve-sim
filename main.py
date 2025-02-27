@@ -43,7 +43,8 @@ def run_sim():
     end = sim.get_im_parameter('end')
     traci_mgr = TraciManager(env, sim, start, end) # New variable to store the simulation end time)
     # traci_mgr = TraciManager(env, sim, 18)
-    # traci_mgr.set_rois([(-50, -10, 50, 10)])
+    # traci_mgr.set_rois([(6430,7180,6562,7257)])
+    # # 6430,7180-6562,7257
     sumo_binary = sim.get_im_parameter('sumo_binary')
     sumo_cfg = sim.get_im_parameter('sumo_cfg')
     sumo_step_length = sim.get_im_parameter('sumo_step_length')
@@ -59,7 +60,6 @@ def run_sim():
 
     if not traci.isLoaded():
         env.process(sim_clock(env, 0.1))
-
 
     ##################################################
     # NOTE: Scenario 1: Static car insertion
@@ -98,21 +98,23 @@ def run_sim():
     # NOTE: Scenario 4: Static cars and TraCI cars
 
     car1 = Car(env, sim)
-    car1.generate_tasks_static()
+    # car1.generate_tasks_static()
+    car1.generate_tasks()
     scheduler.register_static_car([car1])
 
     ##################################################
     # drawer = TraciAnnotation()
 
     # # Add a rectangle using bottom-left and top-right coordinates
-    # bottom_left = (100, 100)
-    # top_right = (200, 200)
+    # # 6430,7180-6562,7257
+    # bottom_left = (6430,7180)
+    # top_right = (6562,7257)
     # drawer.add_rectangle('rectangle1', bottom_left, top_right)
 
-    # # Add a circle
-    # drawer.add_circle('circle1', center=(150, 150), radius=30)
+    # # # Add a circle
+    # drawer.add_circle('circle1', center=(6430,7180), radius=1500)
 
-    # # Draw all shapes in the SUMO simulation
+    # # # Draw all shapes in the SUMO simulation
     # drawer.draw_shapes()
     ##################################################
     
@@ -120,7 +122,7 @@ def run_sim():
     policy = Policy.get_policies()[Sim.get_parameter('policy_name')]
     env.process(scheduler.schedule_tasks(policy))
 
-    env.run(until=30)
+    env.run(until=end+1)
 
     # Print statistics for static cars that haven't been removed by dwell time
     for car in scheduler.static_cars:
