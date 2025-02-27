@@ -17,7 +17,7 @@ class Task:
 
         # Statistic
         # A task can have status
-        # 0 = generated / never assigned
+        # 0 = generated (i.e., never assigned)
         # 1 = assigned
         # 2 = processed
         # 3 = deadline expired
