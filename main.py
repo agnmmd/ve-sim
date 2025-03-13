@@ -3,11 +3,12 @@ from car import Car
 from task import Task
 from scheduler import Scheduler
 from traci_manager import TraciManager
-from policy import Policy
+from policy import *
 import traci
 import os
 import simpy
 from traci_annotation import TraciAnnotation
+from policy_factory import get_policy
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -53,7 +54,12 @@ def run_sim():
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
     # --step-length TIME # Defines the step duration in seconds
-    scheduler = Scheduler(env, traci_mgr)
+
+    # Set up the Scheduler
+    policy = get_policy(Sim.get_parameter('policy_name'), env)
+
+
+    scheduler = Scheduler(env, traci_mgr, policy)
 
     traci.start(sumo_cmd)
     env.process(traci_mgr.execute_one_time_step())
@@ -119,8 +125,7 @@ def run_sim():
     ##################################################
     
     # Start Scheduling
-    policy = Policy.get_policies()[Sim.get_parameter('policy_name')]
-    env.process(scheduler.schedule_tasks(policy))
+    env.process(scheduler.schedule_tasks_2(rl_env))
 
     env.run(until=end+1)
 

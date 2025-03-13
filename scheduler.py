@@ -4,9 +4,10 @@ import numpy as np
 from stats import Statistics
 
 class Scheduler:
-    def __init__(self, env, traci) -> None:
+    def __init__(self, env, traci, policy) -> None:
         self.env = env
         self.traci = traci
+        self.policy = policy
         self.cars = list()
         self.schedule = dict()
         self.static_cars = []
@@ -50,8 +51,10 @@ class Scheduler:
         new_idle_cars = self.previous_busy_cars & currently_idle_cars
         self.previous_busy_cars = {car for car in self.cars if not car.idle}
         return bool(new_idle_cars)
-
-    def schedule_tasks(self, policy):
+    
+    def schedule_tasks_2(self, rl_env = None):
+        if rl_env:
+            rl_env.reset()
         while True:
             self.cars = self.static_cars + self.traci.get_subscribed_vehicles_list()
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
@@ -66,40 +69,36 @@ class Scheduler:
                     Statistics.save_task_stats(task, "NA")
                     task.source_car.generated_tasks.remove(task) # Remove the task from the system
 
-            if self.generated_tasks_exist() and self.idle_cars_exist():
-                for _ in self.get_idle_cars():
-                    # If all tasks have been exhausted, break (e.g., a car that had tasks left the scenario in the meanwhile)
-                    if not self.generated_tasks_exist():
-                        break
+            while self.generated_tasks_exist() and self.idle_cars_exist():
+                # By default filter out the tasks with status 5, however if a new car has joined consider status 5 tasks as well
+                tasks = [t for t in self.get_generated_tasks() if t.status != 5]
+                if self.has_new_cars() or self.car_was_busy_now_is_idle():
+                    print("True")
+                    tasks = self.get_generated_tasks()
 
-                    # By default filter out the tasks with status 5, however if a new car has joined consider status 5 tasks as well
-                    tasks = [t for t in self.get_generated_tasks() if t.status != 5]
-                    if self.has_new_cars() or self.car_was_busy_now_is_idle_2():
-                        print("True")
-                        tasks = self.get_generated_tasks()
 
-                    selected_task = policy(tasks)
-                    # assert selected_task != None, "The policy returned None!"
-                    if selected_task == None:
-                        break
+                selected_task, selected_car = self.policy.match_task_and_car(tasks, self.get_idle_cars())
 
-                    selected_car = self.select_car(selected_task) #np.random.choice(self.get_idle_cars())
-                    # assert selected_car != None, "Car selection returned None!"
-                    if selected_car == None:
-                        selected_task.status = 5
-                        break
+                # NOTE: This case probably never happens.
+                if selected_task is None:
+                    break
 
-                    print(f"Car {selected_car.id} <-- Task {selected_task.id}")
+                if selected_car is None:
+                    selected_task.status = 5
+                    # noped_tasks.append(selected_task)
+                    break
 
-                    # Housekeeping
-                    selected_car.assigned_tasks.append(selected_task) # Assign task to the selected car
-                    selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
-                    selected_task.status = 1
-                    selected_car.idle = False
+                print(f"Car {selected_car.id} <-- Task {selected_task.id}")
 
-                    # Spawn processes for processing the tasks
-                    process = self.env.process(selected_car.process_task(selected_task))
-                    selected_car.active_processes.append(process)
+                # Housekeeping
+                selected_car.assigned_tasks.append(selected_task) # Assign task to the selected car
+                selected_task.source_car.generated_tasks.remove(selected_task) # Remove task from the list of generated tasks
+                selected_task.status = 1
+                selected_car.idle = False
+
+                # Spawn processes for processing the tasks
+                process = self.env.process(selected_car.process_task(selected_task))
+                selected_car.active_processes.append(process)
 
             # Print state after assignments are finished
             print_color("----------------------------------------------------","95")
@@ -136,45 +135,6 @@ class Scheduler:
         """
         tasks = self.get_generated_tasks()
         return [task for task in tasks if (self.has_new_cars() and task.status == 5) or task.status != 5]
-
-    def calculate_completion_time(self, car, task):
-        waiting_time = car.get_remaining_time() + car.calculate_waiting_time()
-        processing_time = car.calculate_processing_time(task)
-        completion_time = waiting_time + processing_time
-
-        print(f"Evaluating Car {car.id} for Task {task.id}:")
-        print(f"  Current Time: {self.env.now}")
-        print(f"  Waiting Time: {waiting_time}")
-        print(f"  Processing Time: {processing_time}")
-        print(f"  Relative Completion Time: {completion_time}")
-        print(f"  Task Time of Arrival: {task.time_of_arrival}")
-        print(f"  Task Deadline: {task.deadline}")
-        print(f"  Estimated Task Completion Time: {self.env.now + completion_time}")
-
-        return completion_time
-
-    def select_car(self, task):
-        selected_car = None
-        best_completion_time = float('inf')
-
-        # # First try to compute locally if the source car is idle
-        # if task.source_car in self.get_idle_cars():
-        #     selected_car = task.source_car
-        #     best_completion_time = self.calculate_completion_time(task.source_car, task)
-
-        # NOTE: The iteration goes through all cars, not only idle cars. But schedule_task() only executes if there are idle cars
-        # for car in self.cars:
-        for car in self.get_idle_cars():
-            completion_time = self.calculate_completion_time(car, task)
-
-            if ((self.env.now + completion_time) <= (task.time_of_arrival + task.deadline)) and (completion_time < best_completion_time):
-                selected_car = car
-                best_completion_time = completion_time
-                print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
-            else:
-                print(f"  -> Car {car.id} not suitable for Task {task.id}, because it can either not meet the deadline or doesn't provide a better completion time.")
-
-        return selected_car
 
     # Static car methods
     def register_static_car(self, cars_list, remove_after_dwell_time=False):
