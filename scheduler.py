@@ -35,18 +35,7 @@ class Scheduler:
         self.previous_cars = current_cars
         return bool(new_cars)
 
-    # def update_previous_busy_cars(self):
-    #     self.previous_busy_cars = {car for car in self.cars if not car.idle}
-
-    # def car_was_busy_now_is_idle(self):
-    #     currently_idle_cars = {car for car in self.cars if car.idle}
-    #     cars_now_idle = self.previous_busy_cars & currently_idle_cars
-
-    #     if cars_now_idle:
-    #         return True
-    #     return False
-
-    def car_was_busy_now_is_idle_2(self):
+    def car_was_busy_now_is_idle(self):
         currently_idle_cars = {car for car in self.cars if car.idle}
         new_idle_cars = self.previous_busy_cars & currently_idle_cars
         self.previous_busy_cars = {car for car in self.cars if not car.idle}
