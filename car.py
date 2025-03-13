@@ -34,12 +34,15 @@ class Car:
         self.time_of_arrival = self.env.now
 
     def generate_tasks(self):
-        while True:
-            yield self.env.timeout(random.expovariate(self.lambda_exp))
-            task = Task(self.env, self.sim, self)
-            self.generated_tasks.append(task)
-            print(f"Car {self.id} generated a Task: {task.__dict__}")
-            self.generated_tasks_count += 1
+        try:
+            while True:
+                yield self.env.timeout(random.expovariate(self.lambda_exp))
+                task = Task(self.env, self.sim, self)
+                self.generated_tasks.append(task)
+                print(f"Car {self.id} generated a Task: {task.__dict__}")
+                self.generated_tasks_count += 1
+        except simpy.Interrupt:
+            print(f"Process generate_tasks() for car {self.id} interrupted!")
 
     def generate_tasks_static(self):
         """
