@@ -9,6 +9,7 @@ import os
 import simpy
 from traci_annotation import TraciAnnotation
 from policy_factory import get_policy
+from rlrl import *
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -58,6 +59,10 @@ def run_sim():
     # Set up the Scheduler
     policy = get_policy(Sim.get_parameter('policy_name'), env)
 
+    rl_env = DQLEnvironment(sim)
+    agent = DQLAgent(rl_env, sim)
+    # policy = DQLTrainingPolicy(env, rl_env, agent)
+    policy = DQLPolicy(env, rl_env, agent)
 
     scheduler = Scheduler(env, traci_mgr, policy)
 

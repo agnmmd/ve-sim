@@ -81,7 +81,26 @@ class InputManager:
             'sumo_cfg': get_items(config.get(section, 'sumo_cfg')),
             'sumo_step_length': get_items(config.get(section, 'sumo_step_length')),
             'traci_step_length': get_items(config.get(section, 'traci_step_length')),
-            'lambda_exp': get_items(config.get(section, 'lambda_exp'))
+            'lambda_exp': get_items(config.get(section, 'lambda_exp')),
+            # ROI
+            'roi_min_x': get_items(config.get(section, 'roi_min_x')),
+            'roi_min_y': get_items(config.get(section, 'roi_min_y')),
+            'roi_max_x': get_items(config.get(section, 'roi_max_x')),
+            'roi_max_y': get_items(config.get(section, 'roi_max_y')),
+            # RL
+            'max_tasks': get_items(config.get(section , 'max_tasks')),
+            'max_cars': get_items(config.get(section, 'max_cars')),
+            'max_speed': get_items(config.get(section, 'max_speed')),
+            'max_complexity': get_items(config.get(section, 'max_complexity')),
+            'max_deadline': get_items(config.get(section, 'max_deadline')),
+            'max_processing_power': get_items(config.get(section, 'max_processing_power')),
+            'episodes': get_items(config.get(section, 'episodes')),
+            'memory': get_items(config.get(section, 'memory')),
+            'batch_size': get_items(config.get(section, 'batch_size')),
+            'learning_rate': get_items(config.get(section, 'learning_rate')),
+            'gamma': get_items(config.get(section, 'gamma')),
+            'epsilon_decay_rate': get_items(config.get(section, 'epsilon_decay_rate')),
+            'epsilon_min': get_items(config.get(section, 'epsilon_min')),
         }
         return configfile_args
 
@@ -90,7 +109,7 @@ class InputManager:
         run = command_line_args.run
         sim_config = command_line_args.sim_config
         run_parameters  = sim_config_runs[(run, sim_config)]
-        
+
         cls.scenario_args = {
             'configfile': command_line_args.configfile,
             'run': run,
@@ -111,7 +130,26 @@ class InputManager:
             'sumo_cfg': str(run_parameters['sumo_cfg']),
             'sumo_step_length': str(run_parameters['sumo_step_length']),
             'traci_step_length': float(run_parameters['traci_step_length']),
-            'lambda_exp': lambda: cls.range_int(run_parameters['lambda_exp'])
+            'lambda_exp': lambda: cls.range_int(run_parameters['lambda_exp']),
+            # ROI
+            'roi_min_x': int(run_parameters['roi_min_x']),
+            'roi_min_y': int(run_parameters['roi_min_y']),
+            'roi_max_x': int(run_parameters['roi_max_x']),
+            'roi_max_y': int(run_parameters['roi_max_y']),
+            # RL
+            'max_tasks': int(run_parameters['max_tasks']),
+            'max_cars': int(run_parameters['max_cars']),
+            'max_speed': int(run_parameters['max_speed']),
+            'max_complexity': int(run_parameters['max_complexity']),
+            'max_deadline': int(run_parameters['max_deadline']),
+            'max_processing_power': int(run_parameters['max_processing_power']), 
+            'episodes': int(run_parameters['episodes']),
+            'memory': int(run_parameters['memory']),
+            'batch_size': int(run_parameters['batch_size']),
+            'learning_rate': float(run_parameters['learning_rate']),
+            'gamma': float(run_parameters['gamma']),
+            'epsilon_decay_rate': float(run_parameters['epsilon_decay_rate']),
+            'epsilon_min': float(run_parameters['epsilon_min']),
         }
 
     @classmethod

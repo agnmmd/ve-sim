@@ -142,3 +142,8 @@ class Scheduler:
         yield self.env.timeout(car.dwell_time)
         self.unregister_static_car(car)
         car.finish()
+
+    def get_reordered_tasks(self, noped_tasks):
+        generated_tasks = self.get_generated_tasks()
+        unevaluated_tasks = [task for task in generated_tasks if task not in noped_tasks]
+        return unevaluated_tasks + [task for task in generated_tasks if task in noped_tasks]

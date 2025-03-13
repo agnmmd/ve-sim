@@ -2,6 +2,7 @@ from stats import Statistics
 from task import Task
 import simpy
 import random
+import numpy as np
 
 class Car:
     def __init__(self, env, sim, speed = None, position: tuple[float, float] = None):
@@ -131,3 +132,20 @@ class Car:
         self.active_processes.clear()
 
         # TODO: Make reporting of tasks statistics a method of Tasks class
+
+    @classmethod
+    def to_dict(cls, car):
+        if car == None:
+            return{
+                'time_of_arrival': np.array(0, dtype=np.float32),
+                'processing_power': np.array(0 ,dtype = np.float32),
+                'speed': np.array(0, dtype=np.float32),
+                'position': np.array([0, 0], dtype=np.float32)
+            }
+        else:
+            return{
+                'time_of_arrival': np.array(car.time_of_arrival, dtype=np.float32),
+                'processing_power': np.array(car.processing_power, dtype = np.float32),
+                'speed': np.array(car.speed, dtype=np.float32),
+                'position': np.array(car.position, dtype=np.float32)
+            }

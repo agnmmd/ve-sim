@@ -1,3 +1,4 @@
+import numpy as np
 import random
 
 class Task:
@@ -24,3 +25,13 @@ class Task:
         # 4 = interrupted
         # 5 = unassignable (i.e., no resource that can process it before deadline)
         self.status = 0
+
+    @classmethod
+    def to_dict(cls, task):
+        if task is None: 
+            return {'deadline': 0, 'complexity': 0}
+        else:
+            return{
+            'deadline': task.deadline,
+            'complexity': task.complexity,
+            }
