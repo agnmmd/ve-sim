@@ -97,7 +97,7 @@ def run_sim():
     ##################################################
     # NOTE: Scenario 4: Static cars and TraCI cars
 
-    car1 = Car(env, sim)
+    car1 = Car(env, sim, speed=-1, position=(-1,-1))
     # car1.generate_tasks_static()
     car1.generate_tasks()
     scheduler.register_static_car([car1])

@@ -101,7 +101,7 @@ class InputManager:
             'duration': convert_time(run_parameters['duration']),
             'end': convert_time(run_parameters['start']) + convert_time(run_parameters['duration']),
             'policy_name': run_parameters['policy'],
-            'policy': Policy.get_policies().get(run_parameters['policy'], None) ,
+            # 'policy': Policy.get_policies().get(run_parameters['policy'], None),
             'task_generation': lambda: cls.range_int(run_parameters['task_generation']),
             'task_complexity': lambda: cls.range_int(run_parameters['task_complexity']),
             'task_priority': lambda: cls.range_int(run_parameters['task_priority']),

@@ -4,7 +4,7 @@ import simpy
 import random
 
 class Car:
-    def __init__(self, env, sim, speed = None, position = None):
+    def __init__(self, env, sim, speed = None, position: tuple[float, float] = None):
         self.env = env
         self.sim = sim
 
@@ -80,7 +80,7 @@ class Car:
                 Statistics.save_task_stats(self.current_task, self.id)
                 self.current_task = None
         except simpy.Interrupt:
-            print(f"Process for car {self.id} interrupted!")
+            print(f"Process process_task() for car {self.id} interrupted!")
 
             # Record the statistics for the task who's process was interrupted
             if(self.current_task):
@@ -126,8 +126,8 @@ class Car:
 
         # Interrupt the processes associated with this Car
         for process in list(self.active_processes):  # Copy the list to avoid modifying it during iteration
-            if process.is_alive:  # Check if the process is still running
-                process.interrupt()  # Interrupt the process
-        self.active_processes.clear()  # Clear the list of processes
+            if process.is_alive:
+                process.interrupt()
+        self.active_processes.clear()
 
         # TODO: Make reporting of tasks statistics a method of Tasks class
