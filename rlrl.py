@@ -218,7 +218,7 @@ class DQLAgent:
         self.sim = sim
         self.state_space = len(rl_env.flatten_state())
         self.action_space = rl_env.action_space.n
-        self.memory = ExperienceReplayBuffer(sim.get_im_parameter('memory'))
+        self.memory = ExperienceReplayBuffer(sim.get_im_parameter('replay_buffer_capacity'))
         self.current_model = self.build_model().to(self.device)
         self.target_model = self.build_model().to(self.device)
         self.copy_current_q_weights()
@@ -277,7 +277,7 @@ class DQLAgent:
         
         return max_valid_q_values
 
-    def act(self, state, mask):
+    def take_action(self, state, mask):
         if np.random.rand() <= self.epsilon:
             action = torch.tensor([[random.choice(self.get_valid_actions(mask))]], device=self.device, dtype=torch.long)
             action_q_value = self.current_model(torch.FloatTensor(state).unsqueeze(0).to(self.device))[0, action.item()].item()

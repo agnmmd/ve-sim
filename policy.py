@@ -73,7 +73,7 @@ class DQLTrainingPolicy(Policy):
             # rl_env.set_values(selected_task, self.get_idle_cars(), self.env.now, self.get_reordered_tasks(noped_tasks))
 
             state_flattened = np.array(self.gymenv.flatten_state())
-            action, q_value = self.agent.act(state_flattened, self.gymenv.make_mask(self.gymenv.state))
+            action, q_value = self.agent.take_action(state_flattened, self.gymenv.make_mask(self.gymenv.state))
 
             if action == self.gymenv.action_space.n-1:
                 selected_car = None
@@ -103,7 +103,7 @@ class DQLPolicy(Policy):
             # rl_env.set_values(selected_task, self.get_idle_cars(), self.env.now, self.get_reordered_tasks(noped_tasks))
 
             state_flattened = np.array(self.gymenv.flatten_state())
-            action, q_value = self.agent.act(state_flattened, self.gymenv.make_mask(self.gymenv.state))
+            action, q_value = self.agent.take_action(state_flattened, self.gymenv.make_mask(self.gymenv.state))
 
             if action == self.gymenv.action_space.n-1:
                 selected_car = None

@@ -65,7 +65,6 @@ class Scheduler:
                     print("True")
                     tasks = self.get_generated_tasks()
 
-
                 selected_task, selected_car = self.policy.match_task_and_car(tasks, self.get_idle_cars())
 
                 # NOTE: This case probably never happens.
