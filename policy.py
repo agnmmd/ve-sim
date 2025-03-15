@@ -114,3 +114,35 @@ class DQLPolicy(Policy):
 
             return selected_task, selected_car
         return None, None
+    
+class DQLTrainingPolicyOther(Policy):
+    def __init__(self, simenv, gymenv, agent):
+        super().__init__(simenv)
+        self.agent = agent
+        self.gymenv = gymenv
+
+    def match_task_and_car(self, tasks, cars):
+        if tasks and cars:
+            print('State before setting values:', self.gymenv._get_state())
+            self.gymenv.set_values(tasks, cars, self.env.now)
+            print('State after setting values:', self.gymenv._get_state())
+
+            action = self.agent.take_action(self.gymenv._get_state(), self.gymenv)
+
+            if action == self.gymenv.action_space.n-1:
+                selected_car = None
+            else:
+                selected_car = self.gymenv.resources[action]
+            
+            next_state, reward, _, _, selected_task = self.gymenv.step(action)
+            print('State after processing the action:', self.gymenv._get_state())
+            # done = terminated or truncated
+            self.agent.store_transition(self.gymenv._get_state(), action, reward, next_state, False)
+            self.agent.update()
+
+            print("Reward:", reward)
+
+            # agent.decay_epsilon(episode)
+
+            return selected_task, selected_car
+        return None, None

@@ -10,6 +10,7 @@ import simpy
 from traci_annotation import TraciAnnotation
 from policy_factory import get_policy
 from rlrl import *
+from rl_other import *
 
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
@@ -57,12 +58,17 @@ def run_sim():
     # --step-length TIME # Defines the step duration in seconds
 
     # Set up the Scheduler
-    policy = get_policy(Sim.get_parameter('policy_name'), env)
+    # policy = get_policy(Sim.get_parameter('policy_name'), env)
+    # policy = EarliestDeadlinePolicy(env)
 
-    rl_env = DQLEnvironment(sim)
-    agent = DQLAgent(rl_env, sim)
-    # policy = DQLTrainingPolicy(env, rl_env, agent)
-    policy = DQLPolicy(env, rl_env, agent)
+    # rl_env = DQLEnvironment(sim)
+    # agent = DQLAgent(rl_env, sim)
+    # # policy = DQLTrainingPolicy(env, rl_env, agent)
+    # policy = DQLPolicy(env, rl_env, agent)
+
+    rl_env = TaskSchedulingEnv(sim)
+    agent = DQNAgentOther(rl_env, sim)
+    policy = DQLTrainingPolicyOther(env, rl_env, agent)
 
     scheduler = Scheduler(env, traci_mgr, policy)
 
