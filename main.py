@@ -12,6 +12,43 @@ from policy_factory import get_policy
 from rlrl import *
 from rl_other import *
 
+def setup_traci(env, sim):
+    start = sim.get_im_parameter('start')
+    end = sim.get_im_parameter('end')
+    traci_mgr = TraciManager(env, sim, start, end) # New variable to store the simulation end time)
+    # traci_mgr = TraciManager(env, sim, 18)
+    # traci_mgr.set_rois([(6430,7180,6562,7257)])
+    # # 6430,7180-6562,7257
+    sumo_binary = sim.get_im_parameter('sumo_binary')
+    sumo_cfg = sim.get_im_parameter('sumo_cfg')
+    sumo_step_length = sim.get_im_parameter('sumo_step_length')
+
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", sumo_step_length]#, "--start"])
+    # --start # Start the simulation immediately after loading (no need to press the start button)
+    # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
+    # --step-length TIME # Defines the step duration in seconds
+
+    traci.start(sumo_cmd)
+    env.process(traci_mgr.execute_one_time_step())
+
+    ##################################################
+    # drawer = TraciAnnotation()
+
+    # # Add a rectangle using bottom-left and top-right coordinates
+    # # 6430,7180-6562,7257
+    # bottom_left = (6430,7180)
+    # top_right = (6562,7257)
+    # drawer.add_rectangle('rectangle1', bottom_left, top_right)
+
+    # # # Add a circle
+    # drawer.add_circle('circle1', center=(6430,7180), radius=1500)
+
+    # # # Draw all shapes in the SUMO simulation
+    # drawer.draw_shapes()
+    ##################################################
+    
+    return traci_mgr
+
 # def generate_cars_by_traces(traces, scheduler, region_of_interest):
 #     xmin, ymin, xmax, ymax = region_of_interest
 #     for car_id in traces[Sim.env.now].items():
