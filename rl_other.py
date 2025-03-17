@@ -200,3 +200,9 @@ class DQNAgentOther:
 
     def decay_epsilon(self, episode):
         self.epsilon = max(self.epsilon_min, self.epsilon_max - episode / self.epsilon_decay)
+
+    def load_model(self, path):
+        self.current_model.load_state_dict(torch.load(path, weights_only=True))
+
+    def save_model(self, path):
+        torch.save(self.current_model.state_dict(), path)
