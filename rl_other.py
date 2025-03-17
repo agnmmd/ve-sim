@@ -144,13 +144,13 @@ class DQNAgentOther:
 
         self.lr = self.sim.get_im_parameter('learning_rate')
         self.replay_buffer_capacity = self.sim.get_im_parameter('replay_buffer_capacity')
-        self.epsilon = self.sim.get_im_parameter('epsilon_min')
         self.gamma = self.sim.get_im_parameter('gamma')
         self.batch_size = self.sim.get_im_parameter('batch_size')
         self.target_update_freq = self.sim.get_im_parameter('target_update_freq')
-        # self.epsilon_start = epsilon_start
-        # self.epsilon_end = epsilon_end
-        # self.epsilon_decay = epsilon_decay
+        self.epsilon_max = self.sim.get_im_parameter('epsilon_max')
+        self.epsilon = self.epsilon_max
+        self.epsilon_min = self.sim.get_im_parameter('epsilon_min')
+        self.epsilon_decay = self.sim.get_im_parameter('epsilon_decay_rate')
 
         self.q_network = DQN(self.state_size, self.action_size)
         self.target_network = DQN(self.state_size, self.action_size)
@@ -199,4 +199,4 @@ class DQNAgentOther:
             self.target_network.load_state_dict(self.q_network.state_dict())
 
     def decay_epsilon(self, episode):
-        self.epsilon = max(self.epsilon_end, self.epsilon_start - episode / self.epsilon_decay)
+        self.epsilon = max(self.epsilon_min, self.epsilon_max - episode / self.epsilon_decay)

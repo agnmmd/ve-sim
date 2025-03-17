@@ -102,6 +102,7 @@ class InputManager:
             'gamma': get_items(config.get(section, 'gamma')),
             'epsilon_decay_rate': get_items(config.get(section, 'epsilon_decay_rate')),
             'epsilon_min': get_items(config.get(section, 'epsilon_min')),
+            'epsilon_max': get_items(config.get(section, 'epsilon_max')),
             'target_update_freq': get_items(config.get(section, 'target_update_freq')),
         }
         return configfile_args
@@ -153,6 +154,7 @@ class InputManager:
             'gamma': float(run_parameters['gamma']),
             'epsilon_decay_rate': float(run_parameters['epsilon_decay_rate']),
             'epsilon_min': float(run_parameters['epsilon_min']),
+            'epsilon_max': float(run_parameters['epsilon_max']),
             'target_update_freq': float(run_parameters['target_update_freq']),
         }
 
