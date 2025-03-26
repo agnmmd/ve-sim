@@ -67,7 +67,7 @@ class Statistics:
             'processing_start': task.processing_start,
             'processing_end': task.processing_end,
             'repetition': Sim.get_parameter('repetition'),
-            'policy': Sim.get_parameter('policy_name'),
+            'policy': Sim.get_parameter('policy'),
             'run': Sim.get_parameter('run'),
             'config': Sim.get_parameter('sim_config'),
             'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
@@ -88,7 +88,7 @@ class Statistics:
             'departure': current_time,
             'lifetime': current_time - car.time_of_arrival,
             'repetition': Sim.get_parameter('repetition'),
-            'policy': Sim.get_parameter('policy_name'),
+            'policy': Sim.get_parameter('policy'),
             'run': Sim.get_parameter('run'),
             'config': Sim.get_parameter('sim_config'),
             'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
