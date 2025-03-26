@@ -14,6 +14,11 @@ class Statistics:
             'run', 'repetition', 'config', 
             'car_id', 'generated_tasks', 'processed_tasks', 'successful_tasks', 'queued_tasks', 'processing_power', 
             'total_processing_time', 'arrival', 'departure', 'lifetime', 'policy', 'lambda_exp'
+        ],
+        'action' : [
+            'run', 'repetition', 'config',
+            'policy', 'lambda_exp', 'episode',
+            'time', 'action', 'reward', 'best_action'
         ]
     }
 
@@ -94,3 +99,19 @@ class Statistics:
             'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
         }
         cls._save_stats('car', data)
+
+    @classmethod
+    def save_action_stats(cls, current_time, episode, action, reward, best):
+        data = {
+            'time': current_time,
+            'episode': episode,
+            'action': action,
+            'reward': reward,
+            'best_action': best,
+            'repetition': Sim.get_parameter('repetition'),
+            'policy': Sim.get_parameter('policy'),
+            'run': Sim.get_parameter('run'),
+            'config': Sim.get_parameter('sim_config'),
+            'lambda_exp': Sim.get_parameter('lambda_exp')() # FIXME: here I am executing the lambda to get the value that I need. This needs to be handled in a smarter way by Sim.get_parameter()
+        }
+        cls._save_stats('action', data)
