@@ -20,10 +20,11 @@ class Task:
         # A task can have status
         # 0 = generated (i.e., never assigned)
         # 1 = assigned
-        # 2 = processed
+        # 2 = processed (before deadline)
         # 3 = deadline expired
         # 4 = interrupted
         # 5 = unassignable (i.e., no resource that can process it before deadline)
+        # 6 = processed (after deadline)
         self.status = 0
 
     @classmethod

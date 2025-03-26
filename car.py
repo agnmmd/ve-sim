@@ -63,7 +63,6 @@ class Car:
                 assert(selected_task == self.assigned_tasks[0])
                 self.current_task = self.assigned_tasks.pop(0)
                 self.current_task.processing_start = self.env.now
-                self.current_task.status = 2
 
                 processing_time = self.calculate_processing_time(selected_task)
                 # Start processing
@@ -75,6 +74,9 @@ class Car:
                 self.processed_tasks_count += 1
                 if self.env.now - self.current_task.time_of_arrival <= self.current_task.deadline:
                     self.successful_tasks += 1
+                    self.current_task.status = 2
+                else:
+                    self.current_task.status = 6
 
                 print(f"@t={self.env.now}, Car {self.id} finished computing Task: {selected_task.id}!")
                 self.current_task.processing_end = self.env.now
