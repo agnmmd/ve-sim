@@ -1,5 +1,4 @@
 import numpy as np
-import random
 
 class Task:
     def __init__(self, env, sim, source_car):

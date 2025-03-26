@@ -41,9 +41,7 @@ class Scheduler:
         self.previous_busy_cars = {car for car in self.cars if not car.idle}
         return bool(new_idle_cars)
     
-    def schedule_tasks_2(self, rl_env = None):
-        if rl_env:
-            rl_env.reset()
+    def schedule_tasks_2(self):
         while True:
             self.cars = self.static_cars + self.traci.get_subscribed_vehicles_list()
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")
@@ -62,12 +60,12 @@ class Scheduler:
                 # By default filter out the tasks with status 5, however if a new car has joined consider status 5 tasks as well
                 tasks = [t for t in self.get_generated_tasks() if t.status != 5]
                 if self.has_new_cars() or self.car_was_busy_now_is_idle():
-                    print("True")
+                    # print("True")
                     tasks = self.get_generated_tasks()
 
                 selected_task, selected_car = self.policy.match_task_and_car(tasks, self.get_idle_cars())
 
-                # NOTE: This case probably never happens.
+                # NOTE: This case probably never occurs.
                 if selected_task is None:
                     break
 

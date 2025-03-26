@@ -22,7 +22,6 @@ class Policy(ABC):
         #     best_completion_time = self.calculate_completion_time(task.source_car, task)
 
         # NOTE: The iteration goes through all cars, not only idle cars. But schedule_task() only executes if there are idle cars
-        # for car in self.cars:
         for car in cars:
             completion_time = self.calculate_completion_time(self.env.now, car, task)
 
