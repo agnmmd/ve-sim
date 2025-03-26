@@ -63,7 +63,7 @@ class RandomPolicy(Policy):
             return task, car
         return None, None
 
-class EarliestDeadlinePolicy(Policy):
+class EarliestDeadline(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.time_of_arrival + t.deadline)
@@ -71,7 +71,7 @@ class EarliestDeadlinePolicy(Policy):
             return task, car
         return None, None
 
-class LowestComplexityPolicy(Policy):
+class LowestComplexity(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.complexity)
@@ -79,7 +79,7 @@ class LowestComplexityPolicy(Policy):
             return task, car
         return None, None
 
-class DQLTrainingPolicy(Policy):
+class DQLTraining(Policy):
     def __init__(self, simenv, gymenv, agent):
         super().__init__(simenv)
         self.agent = agent
@@ -134,8 +134,8 @@ class DQLPolicy(Policy):
             return selected_task, selected_car
         return None, None
     
-class DQLTrainingPolicyOther(Policy):
-    def __init__(self, simenv, gymenv, agent):
+class DQNPolicy(Policy):
+    def __init__(self, simenv, gymenv, agent, episode=-1):
         super().__init__(simenv)
         self.agent = agent
         self.gymenv = gymenv

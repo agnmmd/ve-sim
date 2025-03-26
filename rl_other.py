@@ -132,7 +132,7 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
-class DQNAgentOther:
+class DQNAgent:
     def __init__(self, rl_env, sim):
         
         self.rl_env = rl_env
