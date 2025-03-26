@@ -104,6 +104,9 @@ class InputManager:
             'epsilon_min': get_items(config.get(section, 'epsilon_min')),
             'epsilon_max': get_items(config.get(section, 'epsilon_max')),
             'target_update_freq': get_items(config.get(section, 'target_update_freq')),
+            'rl_environment': get_items(config.get(section, 'rl_environment')),
+            'rl_agent': get_items(config.get(section, 'rl_agent')),
+            'explore': get_items(config.get(section, 'explore')),
         }
         return configfile_args
 
@@ -156,6 +159,9 @@ class InputManager:
             'epsilon_min': float(run_parameters['epsilon_min']),
             'epsilon_max': float(run_parameters['epsilon_max']),
             'target_update_freq': float(run_parameters['target_update_freq']),
+            'rl_environment': str(run_parameters['rl_environment']),
+            'rl_agent': str(run_parameters['rl_agent']),
+            'explore': eval(run_parameters['explore']),
         }
 
     @classmethod
