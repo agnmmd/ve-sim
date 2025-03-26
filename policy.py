@@ -145,6 +145,8 @@ class DQNPolicy(Policy):
 
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
+            stat_resource_count = len(cars) # This is before the decision was made and the resource is removed from the state
+
             self.gymenv.set_values(tasks, cars, self.env.now)
             print("State:", self.gymenv._get_state())
 
@@ -176,7 +178,7 @@ class DQNPolicy(Policy):
             print("===============================================")
 
             from stats import Statistics
-            Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected)
+            Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected, stat_resource_count)
             # Statistics.save_training_stats(self.agent.episode, reward, q_value, loss, self.agent.epsilon, self.agent.sim.is_training, self.agent.sim.is_fixed)
 
 

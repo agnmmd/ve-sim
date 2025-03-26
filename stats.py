@@ -18,7 +18,7 @@ class Statistics:
         'action' : [
             'run', 'repetition', 'config',
             'policy', 'lambda_exp', 'episode',
-            'time', 'action', 'reward', 'best_action'
+            'time', 'action', 'reward', 'best_action', 'resource_count'
         ]
     }
 
@@ -101,13 +101,14 @@ class Statistics:
         cls._save_stats('car', data)
 
     @classmethod
-    def save_action_stats(cls, current_time, episode, action, reward, best):
+    def save_action_stats(cls, current_time, episode, action, reward, is_best, resource_count):
         data = {
             'time': current_time,
             'episode': episode,
             'action': action,
             'reward': reward,
-            'best_action': best,
+            'best_action': is_best,
+            'resource_count': resource_count,
             'repetition': Sim.get_parameter('repetition'),
             'policy': Sim.get_parameter('policy'),
             'run': Sim.get_parameter('run'),
