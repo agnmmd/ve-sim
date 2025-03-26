@@ -160,11 +160,13 @@ class DQNAgent:
         self.replay_buffer = ReplayBuffer(self.replay_buffer_capacity, self.state_size)
         self.train_step_count = 0
 
+        self.explore = self.sim.get_im_parameter('explore')
+
     def take_action(self, state, env):
         valid_mask = torch.zeros(self.max_resources)
         valid_mask[:len(env.resources)] = 1
 
-        if random.random() < self.epsilon:
+        if self.explore and random.random() < self.epsilon:
             valid_actions = [i for i in range(len(env.resources))]
             return random.choice(valid_actions)
         else:
