@@ -104,8 +104,6 @@ class DQLTraining(Policy):
             self.agent.memory.push(state_flattened, action, reward, next_state_flattened, self.gymenv.make_mask(next_state))
             loss = self.agent.replay()
 
-            # Statistics.save_training_stats(self.agent.episode, reward, q_value, loss, self.agent.epsilon, self.agent.sim.is_training, self.agent.sim.is_fixed)
-
             return selected_task, selected_car
         return None, None
 
@@ -139,29 +137,59 @@ class DQNPolicy(Policy):
         super().__init__(simenv)
         self.agent = agent
         self.gymenv = gymenv
+        
+        self.episode = episode
+        self.episode_reward = 0
+        self.episode_actions = []
+        self.episode_best_selection = []
 
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
-            print('State before setting values:', self.gymenv._get_state())
             self.gymenv.set_values(tasks, cars, self.env.now)
-            print('State after setting values:', self.gymenv._get_state())
+            print("State:", self.gymenv._get_state())
 
+            # Execute car selection action
             action = self.agent.take_action(self.gymenv._get_state(), self.gymenv)
 
+            # If the agent returned noop set it to 'None', else return the selected car
             if action == self.gymenv.action_space.n-1:
                 selected_car = None
             else:
                 selected_car = self.gymenv.resources[action]
             
-            next_state, reward, _, _, selected_task = self.gymenv.step(action)
-            print('State after processing the action:', self.gymenv._get_state())
-            # done = terminated or truncated
-            self.agent.store_transition(self.gymenv._get_state(), action, reward, next_state, False)
-            self.agent.update()
-
+            # Take action and observe reward and next state
+            next_state, reward, terminated, _, selected_task = self.gymenv.step(action)
+            print("State after processing the action:", self.gymenv._get_state())
+            
+            # Stats
+            print("===============================================")
             print("Reward:", reward)
+            self.episode_reward += reward
+            self.episode_actions.append(action)
+            best_selected = action == self.gymenv.stat_best_resource_index
+            print("Episode actions: \t", self.episode_actions)
+            print("Best resource index: \t", self.gymenv.stat_best_resource_index)
+            print("Best selected: \t", best_selected)
+            self.episode_best_selection.append(best_selected)
 
-            # agent.decay_epsilon(episode)
+            user_input = input("Enter something (or press Enter to continue): ")
+            print("===============================================")
+
+            from stats import Statistics
+            Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected)
+            # Statistics.save_training_stats(self.agent.episode, reward, q_value, loss, self.agent.epsilon, self.agent.sim.is_training, self.agent.sim.is_fixed)
+
+
+            # Store the transition in replay buffer
+            # FIXME: set the 'done' flag here. When do we consider this to be done? When time expires?
+            done = False # done = terminated or truncated
+            self.agent.replay_buffer.push(self.gymenv._get_state(), action, reward, next_state, done)
+            
+            # Train the Q-network if we have enough samples in the buffer
+            self.agent.update()
 
             return selected_task, selected_car
         return None, None
+    
+    def get_episode_reward(self):
+        return self.episode_reward

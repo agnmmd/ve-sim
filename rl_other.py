@@ -9,7 +9,8 @@ from gymnasium import spaces
 import numpy as np
 import random
 from collections import deque
-import utils as utl
+
+from policy import Policy
 
 # class Task2:
 #     def __init__(self, complexity, deadline):
@@ -25,7 +26,7 @@ class TaskSchedulingEnv(gym.Env):
         super(TaskSchedulingEnv, self).__init__()
         
         # FIXME: fix the hard-coded parameters here
-        self.max_tasks = 20
+        # self.max_tasks = 20   # NOTE: This is not used
         self.max_resources = 5
         self.tasks = []
         self.resources = []
@@ -35,6 +36,9 @@ class TaskSchedulingEnv(gym.Env):
         self.current_time = None
         self.sim = sim
         self.duration = self.sim.get_im_parameter('duration')
+
+        # Statistics
+        self.stat_best_resource_index = -1
 
         # Define Gymnasium action and observation space
         self.action_space = spaces.Discrete(self.max_resources)
@@ -73,25 +77,38 @@ class TaskSchedulingEnv(gym.Env):
         if self.done:
             raise RuntimeError("Episode has ended. Please call reset().")
 
-        if action >= len(self.resources):
-            reward = -2.0
-        else:
-            resource = self.resources[action]
-            self.resources.remove(resource)
-            completion_time = utl.calculate_completion_time(self.current_time, resource, self.current_task)
-            reward = 1.0 if utl.before_deadline(self.current_time, self.current_task, completion_time) else -1.0
+        # if action >= len(self.resources):
+        #     reward = -2.0
+        #     exit()
+        # else:
+        #     resource = self.resources[action]
+        #     self.resources.remove(resource)
+        #     completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
+        #     reward = 1.0 if Policy.before_deadline(self.current_time, self.current_task, completion_time) else -1.0
+
+        resource = self.resources[action]
+        completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
+        reward = 1.0 if Policy.before_deadline(self.current_time, self.current_task, completion_time) else -1.0
 
         # Update state related parameters
+        # NOTE: Here the selected task is returned as info
         info = self.current_task
+
+        # Housekeeping: Update states and statistics
         self.tasks.remove(self.current_task)
         self.current_task = None
+        self.stat_best_resource_index = self.get_best_resource_index()  # NOTE: This information can also be obtained at match_task_and_car() from 'cars' list
+        self.resources.remove(resource)
+        ###################################
 
         self.done = self.current_time == self.duration
-
         obs = self._get_state() if not self.done else np.zeros(self.observation_space.shape, dtype=np.float32)
 
         # Gymnasium expects: obs, reward, terminated, truncated, info = {}
         return obs, reward, self.done, False, info
+    
+    def get_best_resource_index(self):
+        return max(range(len(self.resources)), key=lambda i: self.resources[i].processing_power)
 
 
 # DQN Neural Network (unchanged)
@@ -174,31 +191,38 @@ class DQNAgent:
             q_values = self.q_network(state_tensor, valid_mask)
             return torch.argmax(q_values).item()
 
-    def store_transition(self, state, action, reward, next_state, done):
-        self.replay_buffer.push(state, action, reward, next_state, done)
+    # def store_transition(self, state, action, reward, next_state, done):
+        # self.replay_buffer.push(state, action, reward, next_state, done)
 
     def update(self):
-        if len(self.replay_buffer) < self.batch_size:
+        if len(self.replay_buffer) < self.batch_size: #OK
             return
 
+        # This is a batch
         states, actions, rewards, next_states, dones = self.replay_buffer.sample(self.batch_size)
 
+        # Compute predicted Q-values for current states
         q_values = self.q_network(states)
-        q_values = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
+        q_values = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)  # Get Q-values for chosen actions
 
+        # Compute target Q-values
         with torch.no_grad():
             next_q_values = self.target_network(next_states)
             max_next_q_values = next_q_values.max(1)[0]
             target_q_values = rewards + self.gamma * max_next_q_values * (1 - dones)
 
+        # Compute loss
         loss = nn.MSELoss()(q_values, target_q_values)
+        
+        # Update the network
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        self.train_step_count += 1
-        if self.train_step_count % self.target_update_freq == 0:
-            self.target_network.load_state_dict(self.q_network.state_dict())
+        # # This needs to be done per episode, not per training step
+        # self.train_step_count += 1
+        # if self.train_step_count % self.target_update_freq == 0:
+        #     self.target_network.load_state_dict(self.q_network.state_dict())
 
     def decay_epsilon(self, episode):
         self.epsilon = max(self.epsilon_min, self.epsilon_max - episode / self.epsilon_decay)
@@ -207,4 +231,4 @@ class DQNAgent:
         self.current_model.load_state_dict(torch.load(path, weights_only=True))
 
     def save_model(self, path):
-        torch.save(self.current_model.state_dict(), path)
+        torch.save(self.q_network.state_dict(), path)
