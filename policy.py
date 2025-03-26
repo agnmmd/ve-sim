@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import utils as utl
 
 from abc import ABC, abstractmethod
 
@@ -25,9 +24,9 @@ class Policy(ABC):
         # NOTE: The iteration goes through all cars, not only idle cars. But schedule_task() only executes if there are idle cars
         # for car in self.cars:
         for car in cars:
-            completion_time = utl.calculate_completion_time(self.env.now, car, task)
+            completion_time = self.calculate_completion_time(self.env.now, car, task)
 
-            if utl.before_deadline(self.env.now, task, completion_time) and (completion_time < best_completion_time):
+            if self.before_deadline(self.env.now, task, completion_time) and (completion_time < best_completion_time):
                 selected_car = car
                 best_completion_time = completion_time
                 print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
@@ -35,6 +34,27 @@ class Policy(ABC):
                 print(f"  -> Car {car.id} not suitable for Task {task.id}, because it can either not meet the deadline or doesn't provide a better completion time.")
 
         return selected_car
+
+    @staticmethod
+    def calculate_completion_time(current_time, car, task):
+        waiting_time = car.get_remaining_time() + car.calculate_waiting_time()
+        processing_time = car.calculate_processing_time(task)
+        completion_time = waiting_time + processing_time
+
+        print(f"Evaluating Car {car.id} for Task {task.id}:")
+        print(f"  Current Time: {current_time}")
+        print(f"  Waiting Time: {waiting_time}")
+        print(f"  Processing Time: {processing_time}")
+        print(f"  Relative Completion Time: {completion_time}")
+        print(f"  Task Time of Arrival: {task.time_of_arrival}")
+        print(f"  Task Deadline: {task.deadline}")
+        print(f"  Estimated Task Completion Time: {current_time + completion_time}")
+
+        return completion_time
+
+    @staticmethod
+    def before_deadline(current_time, task, completion_time):
+        return (current_time + completion_time) <= (task.time_of_arrival + task.deadline)
 
 class RandomPolicy(Policy):
     def match_task_and_car(self, tasks, cars):
