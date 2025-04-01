@@ -138,6 +138,25 @@ class DQNPolicy(Policy):
 
             return selected_task, selected_car
         return None, None
-    
+
     def get_episode_reward(self):
         return self.episode_reward
+
+    def get_episode_action_count(self):
+        return len(self.episode_actions)
+
+    def get_episode_best_selection_ratio(self):
+        # Count ONLY True/False (skip other types if needed)
+        true_count = sum(1 for x in self.episode_best_selection if x is True)
+        false_count = sum(1 for x in self.episode_best_selection if x is False)
+        total_bools = true_count + false_count
+
+        # Option 2: Strict mode (raise error for non-booleans)
+        if total_bools != len(self.episode_best_selection):
+            raise ValueError("List must contain only True/False values.")
+
+        # Handle empty lists or all non-booleans
+        if total_bools == 0:
+            return 0.0  # or raise ValueError("No valid boolean values found.")
+
+        return true_count / total_bools
