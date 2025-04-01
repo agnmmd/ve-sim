@@ -33,8 +33,8 @@ class TaskSchedulingEnv(gym.Env):
         self.action_space = spaces.Discrete(self.max_resources)
 
         # Observation: [task_complexity, task_deadline] + resource_cpu_capacity_padded
-        low_obs = np.array([0.0, 0.0] + [0.0] * self.max_resources, dtype=np.float32)
-        high_obs = np.array([np.finfo(np.float32).max] * (2 + self.max_resources), dtype=np.float32)
+        low_obs = np.array([0.0, 0.0, 0.0] + [0.0] * self.max_resources, dtype=np.float32)
+        high_obs = np.array([self.max_resources, np.finfo(np.float32).max, np.finfo(np.float32).max] + [np.finfo(np.float32).max] * self.max_resources, dtype=np.float32)
         self.observation_space = spaces.Box(low=low_obs, high=high_obs, dtype=np.float32)
         self.reset()
 
