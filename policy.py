@@ -176,16 +176,13 @@ class DQNPolicy(Policy):
             print("Best selected: \t", best_selected)
             self.episode_best_selection.append(best_selected)
 
-            user_input = input("Enter something (or press Enter to continue): ")
-            print("===============================================")
 
             from stats import Statistics
             Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected, stat_resource_count)
-            # Statistics.save_training_stats(self.agent.episode, reward, q_value, loss, self.agent.epsilon, self.agent.sim.is_training, self.agent.sim.is_fixed)
 
 
             # Store the transition in replay buffer
-            # FIXME: set the 'done' flag here. When do we consider this to be done? When time expires?
+            # FIXME: set the 'done' flag.
             done = False # done = terminated or truncated
             self.agent.replay_buffer.push(self.gymenv._get_state(), action, reward, next_state, done)
             

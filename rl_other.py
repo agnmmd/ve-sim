@@ -6,35 +6,23 @@ import numpy as np
 
 import gymnasium as gym
 from gymnasium import spaces
-import numpy as np
-import random
 from collections import deque
 
 from policy import Policy
 
-# class Task2:
-#     def __init__(self, complexity, deadline):
-#         self.complexity = complexity
-#         self.deadline = deadline
-
-# class Car2:
-#     def __init__(self, processing_power):
-#         self.processing_power = processing_power
-
 class TaskSchedulingEnv(gym.Env):
     def __init__(self, sim):
         super(TaskSchedulingEnv, self).__init__()
-        
-        # FIXME: fix the hard-coded parameters here
+
+        self.sim = sim
         # self.max_tasks = 20   # NOTE: This is not used
-        self.max_resources = 5
+        self.max_resources = self.sim.get_im_parameter('max_cars')
         self.tasks = []
         self.resources = []
         self.current_task = None
         self.done = False
         self.best_resource = None
         self.current_time = None
-        self.sim = sim
         self.duration = self.sim.get_im_parameter('duration')
 
         # Statistics
@@ -77,14 +65,6 @@ class TaskSchedulingEnv(gym.Env):
         if self.done:
             raise RuntimeError("Episode has ended. Please call reset().")
 
-        # if action >= len(self.resources):
-        #     reward = -2.0
-        #     exit()
-        # else:
-        #     resource = self.resources[action]
-        #     self.resources.remove(resource)
-        #     completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
-        #     reward = 1.0 if Policy.before_deadline(self.current_time, self.current_task, completion_time) else -1.0
 
         resource = self.resources[action]
         completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
@@ -97,21 +77,17 @@ class TaskSchedulingEnv(gym.Env):
         # Housekeeping: Update states and statistics
         self.tasks.remove(self.current_task)
         self.current_task = None
-        self.stat_best_resource_index = self.get_best_resource_index()  # NOTE: This information can also be obtained at match_task_and_car() from 'cars' list
         self.resources.remove(resource)
-        ###################################
 
         self.done = self.current_time == self.duration
         obs = self._get_state() if not self.done else np.zeros(self.observation_space.shape, dtype=np.float32)
 
         # Gymnasium expects: obs, reward, terminated, truncated, info = {}
         return obs, reward, self.done, False, info
-    
+
     def get_best_resource_index(self):
         return max(range(len(self.resources)), key=lambda i: self.resources[i].processing_power)
 
-
-# DQN Neural Network (unchanged)
 class DQN(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DQN, self).__init__()
@@ -213,16 +189,11 @@ class DQNAgent:
 
         # Compute loss
         loss = nn.MSELoss()(q_values, target_q_values)
-        
+
         # Update the network
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
-        # # This needs to be done per episode, not per training step
-        # self.train_step_count += 1
-        # if self.train_step_count % self.target_update_freq == 0:
-        #     self.target_network.load_state_dict(self.q_network.state_dict())
 
     def decay_epsilon(self, episode):
         self.epsilon = max(self.epsilon_min, self.epsilon_max - episode / self.epsilon_decay)
