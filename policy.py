@@ -96,6 +96,10 @@ class DQNPolicy(Policy):
         if tasks and cars:
             stat_resource_count = len(cars) # This is before the decision was made and the resource is removed from the state
 
+            if stat_resource_count == 1:
+                # If there is only one resource to choose from, there is no decision to make --> RL don't learn.
+                return tasks[0], cars[0]
+
             self.gymenv.set_values(tasks, cars, self.env.now)
             print("State:", self.gymenv._get_state())
 
