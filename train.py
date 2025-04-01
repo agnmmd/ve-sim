@@ -4,6 +4,7 @@ from policy import *
 import simpy
 from rl_other import *
 from main import setup_traci
+from stats import Statistics
 
 import random
 import numpy as np
@@ -42,6 +43,7 @@ if __name__ == "__main__":
             car.finish()
 
         print(f"Episode {episode}: Total Reward: {policy.get_episode_reward()}")
+        Statistics.save_episode_stats(episode, policy.get_episode_reward(), policy.get_episode_best_selection_ratio(), policy.get_episode_action_count())
 
         # Decay epsilon after each episode
         agent.decay_epsilon(episode)
