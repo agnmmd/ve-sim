@@ -46,7 +46,7 @@ if __name__ == "__main__":
         Statistics.save_episode_stats(episode, policy.get_episode_reward(), policy.get_episode_best_selection_ratio(), policy.get_episode_action_count())
 
         # Decay epsilon after each episode
-        agent.decay_epsilon(episode)
+        agent.decay_epsilon_exp(episode)
 
         # Periodically update the target network
         if episode % agent.target_update_freq == 0:
