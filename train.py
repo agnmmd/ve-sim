@@ -15,7 +15,6 @@ if __name__ == "__main__":
     rl_env = TaskSchedulingEnv(sim)
     agent = DQNAgent(rl_env, sim)
     n_episodes = Sim.get_parameter("n_episodes")
-    n_episodes = 5
 
     for episode in range(n_episodes):
         # Randomness between episodes

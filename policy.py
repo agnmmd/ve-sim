@@ -47,6 +47,8 @@ class Policy(ABC):
         print(f"  Relative Completion Time: {completion_time}")
         print(f"  Task Time of Arrival: {task.time_of_arrival}")
         print(f"  Task Deadline: {task.deadline}")
+        print("")
+        print(f"  Absolute Deadline: {task.time_of_arrival + task.deadline}")
         print(f"  Estimated Task Completion Time: {current_time + completion_time}")
 
         return completion_time
