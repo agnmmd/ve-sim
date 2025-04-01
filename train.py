@@ -30,20 +30,6 @@ if __name__ == "__main__":
 
         rl_env.reset()
 
-        # Load static car
-        # car1 = Car(env, sim, speed=-1, position=(-1,-1))
-        # # car1.generate_tasks_static()
-        # car1.generate_tasks()
-        # scheduler.register_static_car([car1])
-
-        # # Scenario 5: Fixed tasks
-        # self.tasks = [{'complexity': 2,
-        #                'deadline': 1}
-        #               for _ in range(np.random.randint(5, self.max_tasks))]  # Random task count
-        
-        # self.resources = [{'cpu_capacity': np.random.uniform(1.0, 3.0)}
-        #                   for _ in range(np.random.randint(2, self.max_resources))]  # Random resource count
-
         # Start Scheduling
         env.process(scheduler.schedule_tasks_2())
         end = sim.get_im_parameter('end')
