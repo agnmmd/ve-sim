@@ -9,8 +9,7 @@ import os
 import simpy
 from traci_annotation import TraciAnnotation
 # from policy_factory import get_policy
-from rlrl import *
-from rl_other import *
+from rl import *
 from class_factory import load_class
 
 def sim_clock(env, time_interval):

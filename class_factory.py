@@ -5,8 +5,8 @@ CLASS_REGISTRY = {
     "EarliestDeadline": "policy.EarliestDeadlinePolicy",
     "LowestComplexity": "policy.LowestComplexityPolicy",
     "DQNPolicy": "policy.DQNPolicy",
-    "TaskSchedulingEnv": "rl_other.TaskSchedulingEnv",
-    "DQNAgent": "rl_other.DQNAgent"
+    "TaskSchedulingEnv": "rl.TaskSchedulingEnv",
+    "DQNAgent": "rl.DQNAgent"
 }
 
 def get_class_by_full_path(full_class_name: str):

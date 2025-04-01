@@ -2,7 +2,7 @@ from sim import Sim
 from scheduler import Scheduler
 from policy import *
 import simpy
-from rl_other import *
+from rl import *
 from main import setup_traci
 from stats import Statistics
 
