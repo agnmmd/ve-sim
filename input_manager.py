@@ -47,6 +47,7 @@ class InputManager:
         "normal": random.normalvariate,
         "randint": random.randint,
         "poisson": np.random.poisson,
+        "uniform": np.random.uniform
     } 
 
     # TODO: get rid of the class variables if not absolutely necessary. Use local variables whenever possible.
