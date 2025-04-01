@@ -25,7 +25,7 @@ class Policy(ABC):
         for car in cars:
             completion_time = self.calculate_completion_time(self.env.now, car, task)
 
-            if self.before_deadline(self.env.now, task, completion_time) and (completion_time < best_completion_time):
+            if self.is_before_deadline(self.env.now, task, completion_time) and (completion_time < best_completion_time):
                 selected_car = car
                 best_completion_time = completion_time
                 print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
@@ -54,7 +54,7 @@ class Policy(ABC):
         return completion_time
 
     @staticmethod
-    def before_deadline(current_time, task, completion_time):
+    def is_before_deadline(current_time, task, completion_time):
         return (current_time + completion_time) <= (task.time_of_arrival + task.deadline)
 
 class RandomPolicy(Policy):
