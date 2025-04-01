@@ -81,59 +81,6 @@ class LowestComplexity(Policy):
             return task, car
         return None, None
 
-class DQLTraining(Policy):
-    def __init__(self, simenv, gymenv, agent):
-        super().__init__(simenv)
-        self.agent = agent
-        self.gymenv = gymenv
-
-    def match_task_and_car(self, tasks, cars):
-        if tasks and cars:
-            selected_task = tasks[0]
-            self.gymenv.set_values(selected_task, cars, self.env.now, tasks)
-            # rl_env.set_values(selected_task, self.get_idle_cars(), self.env.now, self.get_reordered_tasks(noped_tasks))
-
-            state_flattened = np.array(self.gymenv.flatten_state())
-            action, q_value = self.agent.take_action(state_flattened, self.gymenv.make_mask(self.gymenv.state))
-
-            if action == self.gymenv.action_space.n-1:
-                selected_car = None
-            else:
-                selected_car = self.gymenv.idle_cars[action]
-
-            next_state, reward, _, _, _ = self.gymenv.step(action)
-            next_state_flattened = self.gymenv.flatten_state()
-            self.agent.memory.push(state_flattened, action, reward, next_state_flattened, self.gymenv.make_mask(next_state))
-            loss = self.agent.replay()
-
-            return selected_task, selected_car
-        return None, None
-
-class DQLPolicy(Policy):
-    def __init__(self, simenv, gymenv, agent):
-        super().__init__(simenv)
-        self.agent = agent
-        self.gymenv = gymenv
-
-    def match_task_and_car(self, tasks, cars):
-        if tasks and cars:
-            selected_task = tasks[0]
-            self.gymenv.set_values(selected_task, cars, self.env.now, tasks)
-            # rl_env.set_values(selected_task, self.get_idle_cars(), self.env.now, self.get_reordered_tasks(noped_tasks))
-
-            state_flattened = np.array(self.gymenv.flatten_state())
-            action, q_value = self.agent.take_action(state_flattened, self.gymenv.make_mask(self.gymenv.state))
-
-            if action == self.gymenv.action_space.n-1:
-                selected_car = None
-            else:
-                selected_car = self.gymenv.idle_cars[action]
-
-            self.gymenv.step(action)
-
-            return selected_task, selected_car
-        return None, None
-    
 class DQNPolicy(Policy):
     def __init__(self, simenv, gymenv, agent, episode=-1):
         super().__init__(simenv)
