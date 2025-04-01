@@ -111,11 +111,11 @@ class DQNPolicy(Policy):
                 selected_car = None
             else:
                 selected_car = self.gymenv.resources[action]
-            
+
             # Take action and observe reward and next state
+            old_state = self.gymenv._get_state()
             next_state, reward, terminated, _, selected_task = self.gymenv.step(action)
             print("State after processing the action:", self.gymenv._get_state())
-            
 
             # Logging and statistics
             print("===============================================")
@@ -127,17 +127,14 @@ class DQNPolicy(Policy):
             print("Best resource index: \t", self.gymenv.stat_best_resource_index)
             print("Best selected: \t", best_selected)
             self.episode_best_selection.append(best_selected)
-
-
             from stats import Statistics
             Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected, stat_resource_count)
             print("===============================================")
 
-
             # Store the transition in replay buffer
             # FIXME: set the 'done' flag.
             done = False # done = terminated or truncated
-            self.agent.replay_buffer.push(self.gymenv._get_state(), action, reward, next_state, done)
+            self.agent.replay_buffer.push(old_state, action, reward, next_state, done)
             
             # Train the Q-network if we have enough samples in the buffer
             self.agent.update()
