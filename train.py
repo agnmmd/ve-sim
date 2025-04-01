@@ -32,7 +32,7 @@ if __name__ == "__main__":
         rl_env.reset()
 
         # Start Scheduling
-        env.process(scheduler.schedule_tasks_2())
+        env.process(scheduler.schedule_tasks())
         end = sim.get_im_parameter('end')
         env.run(until=end+1)
 

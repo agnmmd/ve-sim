@@ -41,7 +41,7 @@ class Scheduler:
         self.previous_busy_cars = {car for car in self.cars if not car.idle}
         return bool(new_idle_cars)
     
-    def schedule_tasks_2(self):
+    def schedule_tasks(self):
         while True:
             self.cars = self.static_cars + self.traci.get_subscribed_vehicles_list()
             print_color(f"\n================== [Log] time: {self.env.now} ==================","93")

@@ -80,7 +80,7 @@ def run_sim():
     scheduler.register_static_car([car1])
 
     # Start Scheduling
-    env.process(scheduler.schedule_tasks_2())
+    env.process(scheduler.schedule_tasks())
     end = sim.get_im_parameter('end')
     env.run(until=end+1)
 
