@@ -44,7 +44,7 @@ class TaskSchedulingEnv(gym.Env):
         self.tasks = []
         self.resources = []
         self.done = False
-        
+
         return self._get_state(), {}  # Gymnasium expects (obs, info)
 
     def _get_state(self):
@@ -100,8 +100,11 @@ class DQN(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         q_values = self.fc3(x)
+
+        # Apply action mask: Invalid actions get -inf Q-values
         if valid_mask is not None:
             q_values = q_values.masked_fill(valid_mask == 0, float('-inf'))
+
         return q_values
 
 class ReplayBuffer:

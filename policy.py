@@ -112,7 +112,8 @@ class DQNPolicy(Policy):
             next_state, reward, terminated, _, selected_task = self.gymenv.step(action)
             print("State after processing the action:", self.gymenv._get_state())
             
-            # Stats
+
+            # Logging and statistics
             print("===============================================")
             print("Reward:", reward)
             self.episode_reward += reward
@@ -126,6 +127,7 @@ class DQNPolicy(Policy):
 
             from stats import Statistics
             Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected, stat_resource_count)
+            print("===============================================")
 
 
             # Store the transition in replay buffer
