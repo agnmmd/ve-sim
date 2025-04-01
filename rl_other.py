@@ -7,6 +7,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 from collections import deque
+import torch.nn.functional as F
 
 from policy import Policy
 
@@ -91,13 +92,13 @@ class TaskSchedulingEnv(gym.Env):
 class DQN(nn.Module):
     def __init__(self, input_dim, output_dim):
         super(DQN, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, output_dim)
+        self.fc1 = nn.Linear(input_dim, 128)
+        self.fc2 = nn.Linear(128, 128)
+        self.fc3 = nn.Linear(128, output_dim)
 
     def forward(self, x, valid_mask=None):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
         q_values = self.fc3(x)
         if valid_mask is not None:
             q_values = q_values.masked_fill(valid_mask == 0, float('-inf'))
