@@ -188,18 +188,16 @@ class DQNAgent:
 
     def take_action(self, state, env):
         valid_mask = torch.zeros(self.max_resources)
-        valid_mask[:len(env.resources)] = 1
+        valid_mask[:len(env.resources)] = 1  # Mark available resources as valid
 
-        if self.explore and random.random() < self.epsilon:
-            valid_actions = [i for i in range(len(env.resources))]
-            return random.choice(valid_actions)
-        else:
-            state_tensor = torch.FloatTensor(state).unsqueeze(0)
-            q_values = self.q_network(state_tensor, valid_mask)
+        state_tensor = torch.FloatTensor(state).unsqueeze(0)
+        q_values = self.q_network(state_tensor, valid_mask)
+
+        if random.random() < self.epsilon:  # Exploration
+            valid_actions = torch.where(valid_mask == 1)[0].tolist()
+            return random.choice(valid_actions) if valid_actions else 0  # Prevent errors
+        else:  # Exploitation
             return torch.argmax(q_values).item()
-
-    # def store_transition(self, state, action, reward, next_state, done):
-        # self.replay_buffer.push(state, action, reward, next_state, done)
 
     def update(self):
         if len(self.replay_buffer) < self.batch_size: #OK
