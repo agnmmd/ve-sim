@@ -49,12 +49,23 @@ class TaskSchedulingEnv(gym.Env):
 
     def _get_state(self):
         task = self.current_task
-        task_vector = [task.complexity, task.deadline] if task else [0, 0]
-        resources_vector = [res.processing_power for res in self.resources]
-        resources_vector += [0] * (self.max_resources - len(resources_vector))
-        
-        state = task_vector + resources_vector
-        return np.array(state, dtype=np.float32)
+        # Normalize task features
+        task_complexity_norm = task.complexity / 2 if task else 0
+        task_deadline_norm = task.deadline / 1 if task else 0
+
+        # Min-max scale processing power to [0, 1]
+        processing_powers_norm = [(res.processing_power - 1) / (3 - 1) for res in self.resources]
+        # Pad to max_resources
+        processing_powers_norm += [0] * (self.max_resources - len(processing_powers_norm))
+
+        # Normalize num available cars
+        num_available_norm = len(self.resources) / self.max_resources
+
+        return np.array(
+            [num_available_norm, task_complexity_norm, task_deadline_norm] +
+            processing_powers_norm,
+            dtype=np.float32
+        )
 
     def set_values(self, tasks, idle_cars, time):
         self.tasks = tasks
@@ -62,14 +73,30 @@ class TaskSchedulingEnv(gym.Env):
         self.resources = idle_cars
         self.current_time = time
 
+        # Stat
+        self.stat_best_resource_index = self.get_best_resource_index()  # NOTE: This information can also be obtained at match_task_and_car() from 'cars' list
+
     def step(self, action):
         if self.done:
             raise RuntimeError("Episode has ended. Please call reset().")
 
+        if action >= len(self.resources):
+            reward = -10.0
+        else:
+            resource = self.resources[action]
+            completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
 
-        resource = self.resources[action]
-        completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
-        reward = 1.0 if Policy.before_deadline(self.current_time, self.current_task, completion_time) else -1.0
+            resource = self.resources[action]
+            completion_time = Policy.calculate_completion_time(self.current_time, resource, self.current_task)
+            best_resource_index = self.get_best_resource_index()
+
+            if action == best_resource_index:
+                if Policy.is_before_deadline(self.current_time, self.current_task, completion_time):
+                    reward = 2.0  # Selected best resource and met deadline
+                else:
+                    reward = 0.0  # Selected best resource but couldn't meet deadline (no penalty)
+            else:
+                reward = -10.0
 
         # Update state related parameters
         # NOTE: Here the selected task is returned as info
