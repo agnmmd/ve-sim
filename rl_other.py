@@ -174,7 +174,8 @@ class DQNAgent:
         self.epsilon_max = self.sim.get_im_parameter('epsilon_max')
         self.epsilon = self.epsilon_max
         self.epsilon_min = self.sim.get_im_parameter('epsilon_min')
-        self.epsilon_decay = self.sim.get_im_parameter('epsilon_decay_rate')
+        # self.epsilon_decay = self.sim.get_im_parameter('epsilon_decay')
+        self.epsilon_decay_rate = self.sim.get_im_parameter('epsilon_decay_rate')
 
         self.q_network = DQN(self.state_size, self.action_size)
         self.target_network = DQN(self.state_size, self.action_size)
