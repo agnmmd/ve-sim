@@ -25,13 +25,3 @@ class Task:
         # 5 = unassignable (i.e., no resource that can process it before deadline)
         # 6 = processed (after deadline)
         self.status = 0
-
-    @classmethod
-    def to_dict(cls, task):
-        if task is None: 
-            return {'deadline': 0, 'complexity': 0}
-        else:
-            return{
-            'deadline': task.deadline,
-            'complexity': task.complexity,
-            }

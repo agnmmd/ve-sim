@@ -16,7 +16,6 @@ class TaskSchedulingEnv(gym.Env):
         super(TaskSchedulingEnv, self).__init__()
 
         self.sim = sim
-        # self.max_tasks = 20   # NOTE: This is not used
         self.max_resources = self.sim.get_im_parameter('max_cars')
         self.tasks = []
         self.resources = []
@@ -98,7 +97,6 @@ class TaskSchedulingEnv(gym.Env):
             else:
                 reward = -10.0
 
-        # Update state related parameters
         # NOTE: Here the selected task is returned as info
         info = self.current_task
 
