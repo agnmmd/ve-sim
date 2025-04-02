@@ -132,7 +132,7 @@ class DQNPolicy(Policy):
             print("===============================================")
 
             # Store the transition in replay buffer
-            # FIXME: set the 'done' flag.
+            # FIXME: Set the 'done' flag.
             done = False # done = terminated or truncated
             self.agent.replay_buffer.push(old_state, action, reward, next_state, done)
             

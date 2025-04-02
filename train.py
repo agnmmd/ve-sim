@@ -35,7 +35,7 @@ if __name__ == "__main__":
         end = sim.get_im_parameter('end')
         env.run(until=end+1)
 
-        # End of simulation episode start here
+        # NOTE: Episode ends here
 
         # Print statistics for static cars that haven't been removed by dwell time
         for car in scheduler.static_cars:
@@ -51,4 +51,4 @@ if __name__ == "__main__":
         if episode % agent.target_update_freq == 0:
             agent.target_network.load_state_dict(agent.q_network.state_dict())
 
-    agent.save_model("./rl/training-dqn.pth")
+    agent.save_model("./training-dqn.pth")
