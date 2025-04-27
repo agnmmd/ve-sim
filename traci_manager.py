@@ -88,10 +88,10 @@ class TraciManager:
 
     def subscribe_to_vehicle(self, vehicle_id):
         traci.vehicle.subscribe(vehicle_id, [tc.VAR_POSITION, tc.VAR_SPEED])
-        car = Car(self.env, self.sim, speed=None, position=None)
+        car = Car(speed=None, position=None)
         self.subscribed_vehicles[vehicle_id] = car
         # car.generate_tasks_static()
-        process = self.env.process(car.generate_tasks())
+        process = Sim.get_env().process(car.generate_tasks())
         car.active_processes.append(process)
 
     def update_vehicle_data(self):
