@@ -1,12 +1,12 @@
 import random
 import numpy as np
 
+from sim import Sim
+from stats import Statistics
 from abc import ABC, abstractmethod
 
 class Policy(ABC):
-    def __init__(self, env):
-        self.env = env
-
+    
     @abstractmethod
     def match_task_and_car(self, tasks, cars):
         """Select a task and a car based on the policy."""
@@ -23,9 +23,9 @@ class Policy(ABC):
 
         # NOTE: The iteration goes through all cars, not only idle cars. But schedule_task() only executes if there are idle cars
         for car in cars:
-            completion_time = self.calculate_completion_time(self.env.now, car, task)
+            completion_time = self.calculate_completion_time(Sim.get_env().now, car, task)
 
-            if self.is_before_deadline(self.env.now, task, completion_time) and (completion_time < best_completion_time):
+            if self.is_before_deadline(Sim.get_env().now, task, completion_time) and (completion_time < best_completion_time):
                 selected_car = car
                 best_completion_time = completion_time
                 print(f"  -> Best car updated to Car {car.id} with Completion Time {completion_time}")
@@ -82,8 +82,8 @@ class LowestComplexity(Policy):
         return None, None
 
 class DQNPolicy(Policy):
-    def __init__(self, simenv, gymenv, agent, episode=-1):
-        super().__init__(simenv)
+    def __init__(self, gymenv, agent, episode=-1):
+        super().__init__()
         self.agent = agent
         self.gymenv = gymenv
         
@@ -100,7 +100,7 @@ class DQNPolicy(Policy):
                 # If there is only one resource to choose from, there is no decision to make --> RL don't learn.
                 return tasks[0], cars[0]
 
-            self.gymenv.set_values(tasks, cars, self.env.now)
+            self.gymenv.set_values(tasks, cars, Sim.get_env().now)
             print("State:", self.gymenv._get_state())
 
             # Execute car selection action
@@ -127,8 +127,7 @@ class DQNPolicy(Policy):
             print("Best resource index: \t", self.gymenv.stat_best_resource_index)
             print("Best selected: \t", best_selected)
             self.episode_best_selection.append(best_selected)
-            from stats import Statistics
-            Statistics.save_action_stats(self.env.now, self.episode, action, reward, best_selected, stat_resource_count)
+            Statistics.save_action_stats(Sim.get_env().now, action, reward, best_selected, stat_resource_count)
             print("===============================================")
 
             # Store the transition in replay buffer
