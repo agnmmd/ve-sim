@@ -65,7 +65,7 @@ class RandomPolicy(Policy):
             return task, car
         return None, None
 
-class EarliestDeadline(Policy):
+class EarliestDeadlinePolicy(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.time_of_arrival + t.deadline)
@@ -73,7 +73,7 @@ class EarliestDeadline(Policy):
             return task, car
         return None, None
 
-class LowestComplexity(Policy):
+class LowestComplexityPolicy(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.complexity)
