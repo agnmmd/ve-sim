@@ -1,4 +1,4 @@
-from sim import Sim
+from ve_sim.sim import Sim
 class Task:
     def __init__(self, source_car):
         self.id = "t" + str(Sim.set_task_id())

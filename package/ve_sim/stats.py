@@ -1,6 +1,6 @@
 import csv
 import os
-from sim import Sim
+from ve_sim.sim import Sim
 import types
 class Statistics:
     _initialized = False

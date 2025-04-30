@@ -1,5 +1,5 @@
 import random
-from input_manager import InputManager
+from ve_sim.input_manager import InputManager
 import numpy as np
 import simpy
 

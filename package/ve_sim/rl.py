@@ -3,13 +3,13 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-from sim import Sim
+from ve_sim.sim import Sim
 import gymnasium as gym
 from gymnasium import spaces
 from collections import deque
 import torch.nn.functional as F
 
-from policy import Policy
+from ve_sim.policy import Policy
 
 class TaskSchedulingEnv(gym.Env):
     def __init__(self):

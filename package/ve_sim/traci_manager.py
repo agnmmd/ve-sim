@@ -1,7 +1,7 @@
 import traci
 import traci.constants as tc
-from car import Car
-from sim import Sim
+from ve_sim.car import Car
+from ve_sim.sim import Sim
 class TraciManager:
     """
     Manages the interaction between SUMO traffic simulation and SimPy environment.

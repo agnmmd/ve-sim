@@ -1,8 +1,8 @@
-from utils import print_color
+from ve_sim.utils import print_color
 import random
 import numpy as np
-from stats import Statistics
-from sim import Sim
+from ve_sim.stats import Statistics
+from ve_sim.sim import Sim
 
 class Scheduler:
     def __init__(self, traci, policy) -> None:

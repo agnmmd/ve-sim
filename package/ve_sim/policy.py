@@ -1,8 +1,8 @@
 import random
 import numpy as np
 
-from sim import Sim
-from stats import Statistics
+from ve_sim.sim import Sim
+from ve_sim.stats import Statistics
 from abc import ABC, abstractmethod
 
 class Policy(ABC):
@@ -65,7 +65,7 @@ class RandomPolicy(Policy):
             return task, car
         return None, None
 
-class EarliestDeadlinePolicy(Policy):
+class EarliestDeadline(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.time_of_arrival + t.deadline)
@@ -73,7 +73,7 @@ class EarliestDeadlinePolicy(Policy):
             return task, car
         return None, None
 
-class LowestComplexityPolicy(Policy):
+class LowestComplexity(Policy):
     def match_task_and_car(self, tasks, cars):
         if tasks and cars:
             task = min(tasks, key=lambda t: t.complexity)

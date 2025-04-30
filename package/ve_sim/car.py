@@ -1,8 +1,8 @@
-from stats import Statistics
-from task import Task
+from ve_sim.stats import Statistics
+from ve_sim.task import Task
 import simpy
 import random
-from sim import Sim
+from ve_sim.sim import Sim
 class Car:
     def __init__(self,speed = None, position: tuple[float, float] = None):
         

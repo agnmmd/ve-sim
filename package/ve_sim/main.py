@@ -1,16 +1,16 @@
-from sim import Sim
-from car import Car
-from task import Task
-from scheduler import Scheduler
-from traci_manager import TraciManager
-from input_manager import InputManager
-from policy import *
+from ve_sim.sim import Sim
+from ve_sim.car import Car
+from ve_sim.task import Task
+from ve_sim.scheduler import Scheduler
+from ve_sim.traci_manager import TraciManager
+from ve_sim.input_manager import InputManager
+from ve_sim.policy import *
 import traci
-from traci_annotation import TraciAnnotation
+from ve_sim.traci_annotation import TraciAnnotation
 # from policy_factory import get_policy
-from rl import *
-from class_factory import load_class
-from stats import Statistics
+from ve_sim.rl import *
+from ve_sim.class_factory import load_class
+from ve_sim.stats import Statistics
 
 def setup_traci():
     traci_mgr = TraciManager()
@@ -111,13 +111,17 @@ def train():
 
     agent.save_model("./training-dqn.pth")
 
-if __name__ == "__main__":
+def run():
 
     if not InputManager.dry_run():
         if InputManager.command_line_args.train:
             train()
         else:
             run_sim()
+
+if __name__ == "__main__":
+
+    run()
 
 
 
