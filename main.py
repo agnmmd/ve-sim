@@ -3,39 +3,32 @@ from car import Car
 from task import Task
 from scheduler import Scheduler
 from traci_manager import TraciManager
+from input_manager import InputManager
 from policy import *
 import traci
-import os
-import simpy
 from traci_annotation import TraciAnnotation
 # from policy_factory import get_policy
 from rl import *
 from class_factory import load_class
+from stats import Statistics
 
-def sim_clock(env, time_interval):
-    """Just a timer that progresses time until the simulation ends"""
-    while True:
-        print("SimPy time: ", env.now)
-        yield env.timeout(time_interval)
-
-def setup_traci(env, sim):
-    start = sim.get_im_parameter('start')
-    end = sim.get_im_parameter('end')
-    traci_mgr = TraciManager(env, sim, start, end) # New variable to store the simulation end time)
-    # traci_mgr = TraciManager(env, sim, 18)
-    # traci_mgr.set_rois([(6430,7180,6562,7257)])
-    # # 6430,7180-6562,7257
-    sumo_binary = sim.get_im_parameter('sumo_binary')
-    sumo_cfg = sim.get_im_parameter('sumo_cfg')
-    sumo_step_length = sim.get_im_parameter('sumo_step_length')
-
-    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", sumo_step_length]#, "--start"])
+def setup_traci():
+    traci_mgr = TraciManager()
+    roi_min_x = Sim.get_parameter('roi_min_x')
+    roi_min_y = Sim.get_parameter('roi_min_y')
+    roi_max_x = Sim.get_parameter('roi_max_x')
+    roi_max_y = Sim.get_parameter('roi_max_y')
+    traci_mgr.set_rois([(roi_min_x, roi_min_y, roi_max_x, roi_max_y)])
+    sumo_binary = Sim.get_parameter('sumo_binary')
+    sumo_cfg = Sim.get_parameter('sumo_cfg')
+    sumo_step_length = Sim.get_parameter('step_length')
+    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", str(sumo_step_length)]#, "--start"])
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
     # --step-length TIME # Defines the step duration in seconds
 
     traci.start(sumo_cmd)
-    env.process(traci_mgr.execute_one_time_step())
+    Sim.get_env().process(traci_mgr.execute_one_time_step())
 
     ##################################################
     # drawer = TraciAnnotation()
@@ -56,36 +49,84 @@ def setup_traci(env, sim):
     return traci_mgr
 
 def run_sim():
-
-    sim = Sim()
-    rl_env = load_class(Sim.get_parameter("rl_environment"), sim=sim)
-    agent = load_class(Sim.get_parameter("rl_agent"), rl_env=rl_env, sim=sim)
-
-    env = simpy.Environment()
-    
+    rl_env = load_class(Sim.get_parameter("rl_environment"))
+    agent = load_class(Sim.get_parameter("rl_agent"), rl_env=rl_env)
     policy_name = Sim.get_parameter("policy")
-    if  policy_name == "DQNPolicy":
-        policy = load_class(Sim.get_parameter("policy"), simenv=env, gymenv=rl_env, agent=agent)
-    else:
-        policy = load_class(Sim.get_parameter("policy"), env=env)
-    
-    traci_mgr = setup_traci(env, sim)
-    scheduler = Scheduler(env, traci_mgr, policy)
 
-    # Load static car
-    car1 = Car(env, sim, speed=-1, position=(-1,-1))
-    # car1.generate_tasks_static()
-    car1.generate_tasks()
-    scheduler.register_static_car([car1])
+    if  policy_name == "DQNPolicy":
+        policy = load_class(Sim.get_parameter("policy"), gymenv=rl_env, agent=agent)
+    else:
+        policy = load_class(Sim.get_parameter("policy"))
+
+    traci_mgr = setup_traci()
+    scheduler = Scheduler(traci_mgr, policy)
 
     # Start Scheduling
-    env.process(scheduler.schedule_tasks())
-    end = sim.get_im_parameter('end')
-    env.run(until=end+1)
+    Sim.get_env().process(scheduler.schedule_tasks())
+    end = Sim.get_parameter('end')
+    Sim.get_env().run(until=end+1)
 
     # Print statistics for static cars that haven't been removed by dwell time
     for car in scheduler.static_cars:
         car.finish()
 
+def train():
+    
+    rl_env = load_class(Sim.get_parameter("rl_environment"))
+    agent = load_class(Sim.get_parameter("rl_agent"), rl_env=rl_env)
+
+    for episode in range(InputManager.command_line_args.episodes):
+        policy_name = Sim.get_parameter("policy")
+
+        if policy_name == "DQNPolicy":
+            policy = load_class(Sim.get_parameter("policy"), gymenv=rl_env, agent=agent)
+        else:
+            raise NameError(f"Policy is not defined correctly")
+        
+        Sim.reset(episode)
+        traci_mgr = setup_traci()
+        scheduler = Scheduler(traci_mgr, policy)
+        rl_env.reset()
+
+        # Start Scheduling
+        Sim.get_env().process(scheduler.schedule_tasks())
+        end = Sim.get_parameter('end')
+        Sim.get_env().run(until=end+1)
+
+        # NOTE: Episode ends here
+
+        # Print statistics for static cÖars that haven't been removed by dwell time
+        for car in scheduler.static_cars:
+            car.finish()
+
+        print(f"Episode {episode}: Total Reward: {policy.get_episode_reward()}")
+        Statistics.save_episode_stats(policy.get_episode_reward(), policy.get_episode_best_selection_ratio(), policy.get_episode_action_count())
+
+        # Decay epsilon after each episode
+        agent.decay_epsilon_exp(episode)
+
+        # Periodically update the target network
+        if episode % agent.target_update_freq == 0:
+            agent.target_network.load_state_dict(agent.q_network.state_dict())
+
+    agent.save_model("./training-dqn.pth")
+
 if __name__ == "__main__":
-    run_sim()
+
+    if not InputManager.dry_run():
+        if InputManager.command_line_args.train:
+            train()
+        else:
+            run_sim()
+
+
+
+# TODO: Optional: In the Scheduler add a list (self.task_queue) that holds all the tasks; Also, the tasks can be subscribed automatically to it
+# TODO: Optional: Use the schedule as a log for the schedule mapping (car, time) to task.
+# NOTE: Due to the order of the iteration there is an order of tasks. Car 0 might be favored.
+# NOTE: A task should be at one entity, there should not be multiple copies of a task;
+# NOTE: Initiation of the tasks currently is happening in the Traci; Alternative: move to __init__ of Car?
+# NOTE: A record of the the car that processes a task is not stored in the Task object for Statistic purposes. Maybe integrate.
+# NOTE: Currently the Stats module exists separately, maybe create the Stats module inside Sim in the constructor...
+# NOTE: Sim configuration is updated with e staticmethod. Maybe generate a Sim() object with all necessary config parameters in the constuctor.
+

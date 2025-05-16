@@ -1,17 +1,13 @@
-import numpy as np
-
+from sim import Sim
 class Task:
-    def __init__(self, env, sim, source_car):
-        self.env = env
-        self.sim = sim
-
-        self.id = "t" + str(self.sim.set_task_id())
+    def __init__(self, source_car):
+        self.id = "t" + str(Sim.set_task_id())
         self.source_car = source_car
-        self.time_of_arrival = self.env.now
+        self.time_of_arrival = Sim.get_env().now
 
-        self.deadline = self.sim.get_im_parameter('task_deadline')()
-        self.priority = self.sim.get_im_parameter('task_priority')()
-        self.complexity = self.sim.get_im_parameter('task_complexity')()
+        self.deadline = Sim.get_parameter('task_deadline')
+        self.priority = Sim.get_parameter('task_priority')
+        self.complexity = Sim.get_parameter('task_complexity')
         self.processing_start = -1
         self.processing_end = -1
 
