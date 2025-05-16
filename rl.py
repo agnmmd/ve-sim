@@ -181,7 +181,7 @@ class DQNAgent:
         self.replay_buffer = ReplayBuffer(self.replay_buffer_capacity, self.state_size)
         self.train_step_count = 0
 
-        self.explore = Sim.get_parameter('explore')
+        # self.explore = Sim.get_parameter('explore')
 
     def take_action(self, state, env):
         valid_mask = torch.zeros(self.max_resources)
