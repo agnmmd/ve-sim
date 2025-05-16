@@ -145,9 +145,8 @@ class InputManager:
 
             if cls.command_line_args.train:
                 cls.all_episodes_from_configfile(configfile_args, section)
-                return cls.all_runs
-
-            cls.all_runs_from_configfile(configfile_args, section)
+            else : 
+                cls.all_runs_from_configfile(configfile_args, section)
 
         return cls.all_runs
     
