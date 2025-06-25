@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-
+from sim import Sim
 import gymnasium as gym
 from gymnasium import spaces
 from collections import deque
@@ -12,18 +12,17 @@ import torch.nn.functional as F
 from policy import Policy
 
 class TaskSchedulingEnv(gym.Env):
-    def __init__(self, sim):
+    def __init__(self):
         super(TaskSchedulingEnv, self).__init__()
 
-        self.sim = sim
-        self.max_resources = self.sim.get_im_parameter('max_cars')
+        self.max_resources = Sim.get_parameter('max_cars')
         self.tasks = []
         self.resources = []
         self.current_task = None
         self.done = False
         self.best_resource = None
         self.current_time = None
-        self.duration = self.sim.get_im_parameter('duration')
+        self.duration = Sim.get_parameter('duration')
 
         # Statistics
         self.stat_best_resource_index = -1
@@ -155,25 +154,24 @@ class ReplayBuffer:
         return len(self.buffer)
 
 class DQNAgent:
-    def __init__(self, rl_env, sim):
+    def __init__(self, rl_env):
         
         self.rl_env = rl_env
-        self.sim = sim
 
         self.state_size = rl_env.observation_space.shape[0]
         self.action_size = rl_env.action_space.n
         self.max_resources = rl_env.max_resources
 
-        self.lr = self.sim.get_im_parameter('learning_rate')
-        self.replay_buffer_capacity = self.sim.get_im_parameter('replay_buffer_capacity')
-        self.gamma = self.sim.get_im_parameter('gamma')
-        self.batch_size = self.sim.get_im_parameter('batch_size')
-        self.target_update_freq = self.sim.get_im_parameter('target_update_freq')
-        self.epsilon_max = self.sim.get_im_parameter('epsilon_max')
+        self.lr = Sim.get_parameter('learning_rate')
+        self.replay_buffer_capacity = Sim.get_parameter('replay_buffer_capacity')
+        self.gamma = Sim.get_parameter('gamma')
+        self.batch_size = Sim.get_parameter('batch_size')
+        self.target_update_freq = Sim.get_parameter('target_update_freq')
+        self.epsilon_max = Sim.get_parameter('epsilon_max')
         self.epsilon = self.epsilon_max
-        self.epsilon_min = self.sim.get_im_parameter('epsilon_min')
-        # self.epsilon_decay = self.sim.get_im_parameter('epsilon_decay')
-        self.epsilon_decay_rate = self.sim.get_im_parameter('epsilon_decay_rate')
+        self.epsilon_min = Sim.get_parameter('epsilon_min')
+        # self.epsilon_decay = Sim.get_parameter('epsilon_decay')
+        self.epsilon_decay_rate = Sim.get_parameter('epsilon_decay_rate')
 
         self.q_network = DQN(self.state_size, self.action_size)
         self.target_network = DQN(self.state_size, self.action_size)
@@ -183,7 +181,7 @@ class DQNAgent:
         self.replay_buffer = ReplayBuffer(self.replay_buffer_capacity, self.state_size)
         self.train_step_count = 0
 
-        self.explore = self.sim.get_im_parameter('explore')
+        # self.explore = Sim.get_parameter('explore')
 
     def take_action(self, state, env):
         valid_mask = torch.zeros(self.max_resources)

@@ -267,9 +267,9 @@ class InputManager:
         config_parameters = [f for f in cls.scenario_args.keys()]
         missing_parameters = []
 
-        for parameter in extracted_parameters:
-            if parameter not in config_parameters:
-                missing_parameters.append(parameter)
+        for required_parameter in extracted_parameters:
+            if required_parameter not in config_parameters:
+                missing_parameters.append(required_parameter)
 
         if missing_parameters:
             raise ValueError(f"Missing parameters in config: {missing_parameters}")

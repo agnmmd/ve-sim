@@ -1,34 +1,31 @@
 import traci
 import traci.constants as tc
 from car import Car
-
+from sim import Sim
 class TraciManager:
     """
     Manages the interaction between SUMO traffic simulation and SimPy environment.
     Handles vehicle subscriptions, updates, and region of interest (ROI) filtering.
     """
-    def __init__(self, env, sim, start_time, end_time):
-        self.env = env
-        self.sim = sim
-
+    def __init__(self):
         self.rois = []  # List of regions of interest
         self.subscribed_vehicles = {}  # Dictionary to store subscribed vehicles
-        self.end_time = end_time  # New variable to store the simulation end time
-        self.start_time = start_time
-        self.traci_step_length = self.sim.get_im_parameter('traci_step_length')
+        self.end_time = Sim.get_parameter("end")  # New variable to store the simulation end time
+        self.start_time = Sim.get_parameter("start")
+        self.traci_step_length = Sim.get_parameter('step_length')
 
     def execute_one_time_step(self):
-        while traci.simulation.getMinExpectedNumber() > 0 and self.env.now <= self.end_time:
+        while traci.simulation.getMinExpectedNumber() > 0 and Sim.get_env().now <= self.end_time:
             try:
                 traci.simulationStep()
-                yield self.env.timeout(self.traci_step_length)
+                yield Sim.get_env().timeout(float(self.traci_step_length))
                 traci_time = traci.simulation.getTime()
-                print(f"Time in SimPy: {self.env.now}, Time in SUMO: {traci_time}")
+                print(f"Time in SimPy: {Sim.get_env().now}, Time in SUMO: {traci_time}")
 
                 # Round the times to 6 decimals and make sure that they are in sync
-                assert round(self.env.now, 6) == round(traci_time, 6), "SimPy time and TraCI time are not the same!"
+                assert round(Sim.get_env().now, 6) == round(traci_time, 6), "SimPy time and TraCI time are not the same!"
 
-                if self.env.now >= self.start_time:
+                if Sim.get_env().now >= self.start_time:
                     self.update_subscriptions()
                     self.update_vehicle_data()
 
@@ -41,7 +38,7 @@ class TraciManager:
         self._handle_simulation_end()
 
     def _handle_simulation_end(self):
-        print(f"Simulation ending at time: {self.env.now}")
+        print(f"Simulation ending at time: {Sim.get_env().now}")
         # Perform any cleanup operations here
         for vehicle in self.subscribed_vehicles.values():
             vehicle.finish()
@@ -91,10 +88,10 @@ class TraciManager:
 
     def subscribe_to_vehicle(self, vehicle_id):
         traci.vehicle.subscribe(vehicle_id, [tc.VAR_POSITION, tc.VAR_SPEED])
-        car = Car(self.env, self.sim, speed=None, position=None)
+        car = Car(speed=None, position=None)
         self.subscribed_vehicles[vehicle_id] = car
         # car.generate_tasks_static()
-        process = self.env.process(car.generate_tasks())
+        process = Sim.get_env().process(car.generate_tasks())
         car.active_processes.append(process)
 
     def update_vehicle_data(self):
