@@ -14,11 +14,11 @@ from stats import Statistics
 
 def setup_traci():
     traci_mgr = TraciManager()
-    roi_min_x = Sim.get_parameter('roi_min_x')
-    roi_min_y = Sim.get_parameter('roi_min_y')
-    roi_max_x = Sim.get_parameter('roi_max_x')
-    roi_max_y = Sim.get_parameter('roi_max_y')
-    traci_mgr.set_rois([(roi_min_x, roi_min_y, roi_max_x, roi_max_y)])
+    # roi_min_x = Sim.get_parameter('roi_min_x')
+    # roi_min_y = Sim.get_parameter('roi_min_y')
+    # roi_max_x = Sim.get_parameter('roi_max_x')
+    # roi_max_y = Sim.get_parameter('roi_max_y')
+    # traci_mgr.set_rois([(roi_min_x, roi_min_y, roi_max_x, roi_max_y)])
     sumo_binary = Sim.get_parameter('sumo_binary')
     sumo_cfg = Sim.get_parameter('sumo_cfg')
     sumo_step_length = Sim.get_parameter('step_length')
