@@ -137,7 +137,6 @@ class Statistics:
             'best_action': is_best,
             'resource_count': resource_count,
             **cls._shared_params,
-            
         }
         cls._save_stats('action', data)
 
