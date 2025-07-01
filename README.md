@@ -48,4 +48,4 @@ A simulation framework for Reinforcement Learning (RL) based task scheduling in 
 ## Getting Started
 
 ```bash
-python3 train.py -r 0 -cf config.ini -c RL-training
+python3 main.py -cf config.ini -c RL-training --episodes 2000  --train
