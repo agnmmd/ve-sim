@@ -11,6 +11,9 @@ import torch.nn.functional as F
 
 from policy import Policy
 
+seed = Sim.get_parameter("seed")
+local_random_generator = random.Random(seed)
+
 class TaskSchedulingEnv(gym.Env):
     def __init__(self):
         super(TaskSchedulingEnv, self).__init__()
@@ -142,7 +145,7 @@ class ReplayBuffer:
         self.buffer.append((state, action, reward, next_state, done))
 
     def sample(self, batch_size):
-        batch = random.sample(self.buffer, batch_size)
+        batch = local_random_generator.sample(self.buffer, batch_size)
         states, actions, rewards, next_states, dones = zip(*batch)
         return (torch.FloatTensor(np.array(states)),
                 torch.LongTensor(actions),
@@ -190,9 +193,9 @@ class DQNAgent:
         state_tensor = torch.FloatTensor(state).unsqueeze(0)
         q_values = self.q_network(state_tensor, valid_mask)
 
-        if random.random() < self.epsilon:  # Exploration
+        if local_random_generator.random() < self.epsilon:  # Exploration
             valid_actions = torch.where(valid_mask == 1)[0].tolist()
-            return random.choice(valid_actions) if valid_actions else 0  # Prevent errors
+            return local_random_generator.choice(valid_actions) if valid_actions else 0  # Prevent errors
         else:  # Exploitation
             return torch.argmax(q_values).item()
 
