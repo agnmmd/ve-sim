@@ -18,7 +18,7 @@ class Sim:
             np.random.seed(cls.seed)
             random.seed(cls.seed)
         return cls._sim_instance
-    
+
     @classmethod
     def reset(cls, episode):
         cls._sim_instance = None
