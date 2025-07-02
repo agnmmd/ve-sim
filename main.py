@@ -25,11 +25,10 @@ def setup_traci(env, sim):
     # traci_mgr = TraciManager(env, sim, 18)
     # traci_mgr.set_rois([(6430,7180,6562,7257)])
     # # 6430,7180-6562,7257
-    sumo_binary = sim.get_im_parameter('sumo_binary')
     sumo_cfg = sim.get_im_parameter('sumo_cfg')
     sumo_step_length = sim.get_im_parameter('sumo_step_length')
 
-    sumo_cmd = [sumo_binary, "-c", sumo_cfg, "--quit-on-end", "--step-length", sumo_step_length]#, "--start"])
+    sumo_cmd = ["sumo", "-c", sumo_cfg, "--quit-on-end", "--step-length", sumo_step_length]#, "--start"])
     # --start # Start the simulation immediately after loading (no need to press the start button)
     # --quit-on-end # Quit the simulation gui in the end automatically once the simulation is finished
     # --step-length TIME # Defines the step duration in seconds
