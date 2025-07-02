@@ -64,15 +64,6 @@ def get_parameter_type(string):
     else:
         return "str"
 class InputManager:
-    distribution_map = {
-        "exponential": np.random.exponential,
-        "normal": random.normalvariate,
-        "randint": random.randint,
-        "poisson": np.random.poisson,
-        "uniform": np.random.uniform
-    } 
-
-    # TODO: get rid of the class variables if not absolutely necessary. Use local variables whenever possible.
     scenario_args = None
     all_runs = dict()
     command_line_args = None
@@ -131,6 +122,19 @@ class InputManager:
             "seed": run % get_number(run_parameters["repeat"]) if run is not None else episode
         }
 
+        cls.seed = cls.scenario_args["seed"]
+        cls.local_np_random_generator = np.random.default_rng(cls.seed)
+        cls.local_random_generator = random.Random(cls.seed)
+
+        # Update distribution map with new RNGs
+        cls.distribution_map = {
+            "exponential": cls.local_np_random_generator.exponential,
+            "normal": cls.local_np_random_generator.normal,
+            "integers": cls.local_np_random_generator.integers,  # note: use `.integers()` instead of `.randint()`
+            "poisson": cls.local_np_random_generator.poisson,
+            "uniform": cls.local_np_random_generator.uniform,
+        }
+        
     @classmethod
     def compile_all_runs_from_configfile(cls):
         """
