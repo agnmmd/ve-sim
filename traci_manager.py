@@ -63,7 +63,7 @@ class TraciManager:
             self.update_subscriptions_without_roi()
 
     def update_subscriptions_with_roi(self):
-        for vehicle_id in set(traci.vehicle.getIDList()):
+        for vehicle_id in traci.vehicle.getIDList():
             if vehicle_id not in self.subscribed_vehicles:
                 position = traci.vehicle.getPosition(vehicle_id)
                 if self._is_in_roi(position):
@@ -72,12 +72,17 @@ class TraciManager:
 
         # Remove vehicles
         for vehicle_id in list(self.subscribed_vehicles.keys()):
-            position = traci.vehicle.getPosition(vehicle_id)
-            if not self._is_in_roi(position):
-                self._handle_left_vehicles(vehicle_id)
+            try:
+                position = traci.vehicle.getPosition(vehicle_id)
+                if not self._is_in_roi(position):
+                    self._handle_left_vehicles(vehicle_id)
+            except traci.exceptions.TraCIException:
+                self.subscribed_vehicles[vehicle_id].finish()
+                del self.subscribed_vehicles[vehicle_id]
+                print(f"Warning: Vehicle {vehicle_id} teleported.")
 
     def update_subscriptions_without_roi(self):
-        for vehicle_id in set(traci.vehicle.getIDList()):
+        for vehicle_id in traci.vehicle.getIDList():
             if vehicle_id not in self.subscribed_vehicles:
                 self.subscribe_to_vehicle(vehicle_id)
 
@@ -104,7 +109,7 @@ class TraciManager:
                 # print(f"Vehicle: {vehicle_id}, Position: {position}, Speed: {speed}")
 
     def _handle_left_vehicles(self, vehicle_id):
-        if vehicle_id in set(traci.vehicle.getIDList()):
+        if vehicle_id in traci.vehicle.getIDList():
             traci.vehicle.unsubscribe(vehicle_id)
         self.subscribed_vehicles[vehicle_id].finish()
         del self.subscribed_vehicles[vehicle_id]
