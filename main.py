@@ -54,6 +54,7 @@ def run_sim():
     policy_name = Sim.get_parameter("policy")
 
     if  policy_name == "DQNPolicy":
+        agent.load_model("/home/negin/ve-sim/training-dqn.pth")
         policy = load_class(Sim.get_parameter("policy"), gymenv=rl_env, agent=agent)
     else:
         policy = load_class(Sim.get_parameter("policy"))

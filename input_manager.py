@@ -24,21 +24,40 @@ def has_matching_parentheses(s):
             stack.pop()
     return len(stack) == 0
 
+def smart_split_items(s):
+    items = []
+    current = []
+    parens = 0
+
+    for char in s:
+        if char == ',' and parens == 0:
+            item = ''.join(current).strip()
+            if item:
+                items.append(item)
+            current = []
+        else:
+            if char == '(':
+                parens += 1
+            elif char == ')':
+                parens -= 1
+            current.append(char)
+
+    # Add the last item
+    item = ''.join(current).strip()
+    if item:
+        items.append(item)
+    return items
+
 def get_items(items):
     if items is None:
         return
     if items.startswith("(") and "," in items and not items.endswith(")"):
         raise ValueError("Input starts with '(' and contains ',' but does not end with ')'.")
-    if has_matching_parentheses(items) is False:
+    if not has_matching_parentheses(items):
         raise ValueError("Input has wrong number of ( ).")
     if items.startswith("(") and items.endswith(")"):
         content = items[1:-1]
-        matches = re.findall(r"[-+]?\d*\.?\d+", content)
-
-        if matches:
-            return matches
-        else:
-            return [item.strip() for item in content.split(",")]
+        return smart_split_items(content)
     return [items]
 
 def get_number(number):
@@ -287,7 +306,7 @@ class InputManager:
         if cls.command_line_args.dry_run:
             if cls.command_line_args.run is not None:
                 print(f"\nThe parameters for run index ({cls.command_line_args.run}) and  simulation ({cls.command_line_args.sim_config}) are: \n\n{all_parameters[(cls.command_line_args.run , cls.command_line_args.sim_config)]}\n")
-            if cls.command_line_args.train is not None:
+            elif cls.command_line_args.train is not None:
                 print(f"\nThe parameters for episode ({cls.command_line_args.episodes}) and  simulation ({cls.command_line_args.sim_config}) are: \n\n{all_parameters[(cls.command_line_args.episodes -1 , cls.command_line_args.sim_config)]}\n")
             return True
         else:
