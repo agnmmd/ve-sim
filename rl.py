@@ -231,7 +231,7 @@ class DQNAgent:
         self.epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(-self.epsilon_decay_rate * episode)
 
     def load_model(self, path):
-        self.current_model.load_state_dict(torch.load(path, weights_only=True))
-
+        self.q_network.load_state_dict(torch.load(path))
+        self.q_network.eval()
     def save_model(self, path):
         torch.save(self.q_network.state_dict(), path)

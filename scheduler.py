@@ -52,7 +52,7 @@ class Scheduler:
             for task in self.get_generated_tasks():
                 if Sim.get_env().now >= (task.time_of_arrival + task.deadline):
                     print(f"The deadline of Task {task.id} is in the past; Removing it!")
-                    # task.status = 3
+                    task.status = 3
                     Statistics.save_task_stats(task, "NA")
                     task.source_car.generated_tasks.remove(task) # Remove the task from the system
 
