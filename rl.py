@@ -57,7 +57,11 @@ class TaskSchedulingEnv(gym.Env):
         # Min-max scale processing power to [0, 1]
         processing_powers_norm = [(res.processing_power - 1) / (3 - 1) for res in self.resources]
         # Pad to max_resources
-        processing_powers_norm += [0] * (self.max_resources - len(processing_powers_norm))
+        # processing_powers_norm += [0] * (self.resources - len(processing_powers_norm))
+        if len(processing_powers_norm) < self.max_resources:
+            processing_powers_norm += [0] * (self.max_resources - len(processing_powers_norm))
+        else:
+            processing_powers_norm = processing_powers_norm[:self.max_resources]
 
         # Normalize num available cars
         num_available_norm = len(self.resources) / self.max_resources
