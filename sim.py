@@ -13,11 +13,16 @@ class Sim:
     def __new__(cls):
         if cls._sim_instance is None:
             cls._sim_instance = super().__new__(cls)
-            # Set random seed ONCE here
-            cls.seed = cls.get_parameter("seed")
-            np.random.seed(cls.seed)
-            random.seed(cls.seed)
         return cls._sim_instance
+    
+    def __init__(self):
+        # Use class method to get run and repetition
+        # self.run = self.get_parameter("run")
+        # self.repetition = self.get_parameter("repetition")
+
+        # Set random seed for reproducibility
+        np.random.seed(self.get_parameter("seed"))
+        random.seed(self.get_parameter("seed"))
 
     @classmethod
     def reset(cls, episode):
@@ -26,10 +31,6 @@ class Sim:
         cls._task_id_counter = -1
         cls._car_id_counter = -1
         cls.sim_parameters = InputManager.get_scenario_args(episode)
-        # reseed the random at each episode.
-        cls.seed = cls.get_parameter("seed")
-        np.random.seed(cls.seed)
-        random.seed(cls.seed)
 
     @classmethod
     def set_task_id(cls):

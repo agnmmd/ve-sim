@@ -41,10 +41,10 @@ A simulation framework for Reinforcement Learning (RL) based task scheduling in 
 
 ## Dependencies
 
-- SimPy (4.1.1)
-- SUMO / TraCI (1.23.1)
-- PyTorch (2.4.0)
-- Python (3.11.10)
+- [SimPy](https://simpy.readthedocs.io/en/latest/)
+- [SUMO](https://eclipse.dev/sumo/)
+- [PyTorch](https://pytorch.org/)
+- [TraCI](https://sumo.dlr.de/docs/TraCI.html)
 
 ## Getting Started
 
