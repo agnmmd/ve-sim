@@ -54,7 +54,8 @@ def run_sim():
     policy_name = Sim.get_parameter("policy")
 
     if  policy_name == "DQNPolicy":
-        agent.load_model("/home/negin/ve-sim/training-dqn.pth")
+        state_dict = torch.load("training-dqn.pth", weights_only=True)  # Safe loading
+        agent.q_network.load_state_dict(state_dict)
         policy = load_class(Sim.get_parameter("policy"), gymenv=rl_env, agent=agent)
     else:
         policy = load_class(Sim.get_parameter("policy"))
@@ -110,7 +111,7 @@ def train():
         if episode % agent.target_update_freq == 0:
             agent.target_network.load_state_dict(agent.q_network.state_dict())
 
-    agent.save_model("./training-dqn.pth")
+    torch.save(agent.q_network.state_dict(), "./training-dqn.pth")
 
 if __name__ == "__main__":
 

@@ -51,4 +51,4 @@ if __name__ == "__main__":
         if episode % agent.target_update_freq == 0:
             agent.target_network.load_state_dict(agent.q_network.state_dict())
 
-    agent.save_model("./training-dqn.pth")
+    torch.save(agent.q_network.state_dict(), "./training-dqn.pth")
